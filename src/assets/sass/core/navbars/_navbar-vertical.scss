@@ -169,7 +169,8 @@
                     bottom: 0;
                     width: 100%;
                     max-width: $navbar-vertical-width;
-                    overflow-y: auto;
+                    overflow-y: hidden;
+					overflow-x: hidden;
                     padding-left: 0;
                     padding-right: 0;
 
@@ -313,9 +314,11 @@
         @include media-breakpoint-up(xl) {
             &.fixed-left + .main-content {
                 margin-left: $navbar-vertical-open-width;
+				overflow-y: auto;
             }
             &.fixed-right + .main-content {
                 margin-right: $navbar-vertical-open-width;
+				overflow-y: auto;
             }
         }
     }
@@ -333,6 +336,7 @@
     @include media-breakpoint-up(xl) {
         &:hover {
             max-width: $navbar-vertical-open-width;
+			overflow-y: auto;
         }
 
         .sidenav-toggler {
@@ -371,6 +375,7 @@
 .g-sidenav-pinned {
     .sidenav {
         max-width: $navbar-vertical-open-width !important;
+		overflow-y: auto;
 
         .navbar-brand,
         .navbar-heading {
