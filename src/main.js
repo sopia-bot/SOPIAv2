@@ -17,20 +17,20 @@
 import Vue from 'vue';
 import DashboardPlugin from './plugins/dashboard-plugin';
 import App from './App.vue';
+import router from "./router/router";
+import store from "./store";
 import VueParticles from 'vue-particles';
-
-
+import Transitions from 'vue2-transitions'
 import '@/assets/css/style.css';
 
-// router setup
-import router from './router/index';
 // plugin setup
 Vue.use(DashboardPlugin);
 Vue.use(VueParticles);
+Vue.use(Transitions);
 
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  render: h => h(App),
-  router
-});
+	render: h => h(App),
+	router,
+	store,
+}).$mount('#app');

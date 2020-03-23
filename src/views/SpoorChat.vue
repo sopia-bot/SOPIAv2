@@ -1,8 +1,8 @@
 <template>
-    <div>Hello Home</div>
+    <div>Hello SpoorChat</div>
 </template>
 <script>
 export default {
-    name: 'Home',
+    name: 'SpoorChat',
 }
 </script>
