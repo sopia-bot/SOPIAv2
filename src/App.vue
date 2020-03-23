@@ -64,6 +64,13 @@
 	</div>
 </template>
 <style>
+.ma-0 {
+	margin: 0;
+}
+.pa-0 {
+	padding: 0;
+}
+
 .main-content {
 	min-height: 100vh;
 }
