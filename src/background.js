@@ -20,8 +20,10 @@ function createWindow () {
 		width: 800,
 		height: 600,
 		webPreferences: {
-		nodeIntegration: true
-	} })
+			nodeIntegration: true,
+		} ,
+		show: false,
+	})
 
 	if (process.env.WEBPACK_DEV_SERVER_URL) {
 		// Load the url of the dev server if in development mode
@@ -32,6 +34,10 @@ function createWindow () {
 		// Load the index.html when not in development
 		win.loadURL('app://./index.html')
 	}
+
+	win.once('ready-to-show', () => {
+		win.show();
+	});
 
 	win.on('closed', () => {
 		win = null
