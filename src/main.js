@@ -21,6 +21,7 @@ import router from "./router/router";
 import store from "./store";
 import VueParticles from 'vue-particles';
 import Transitions from 'vue2-transitions'
+import './mixin/global.js';
 import '@/assets/css/style.css';
 
 // plugin setup
