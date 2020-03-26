@@ -6,7 +6,7 @@ import path from 'path';
 Vue.mixin({
 	methods: {
 		/**
-		 * @function getPath
+		 * @function p
 		 * @param {string} path_
 		 * 현재 프로그램이 시작된 경로를 기준으로,
 		 * @path_ 의 절대 경로를 반환한다.
@@ -20,6 +20,15 @@ Vue.mixin({
 				p = path.dirname(exePath);
 			}
 			return path.join(p, path_);
+		},
+		/**
+		 * @function up
+		 * @param {string} path_
+		 * %appdata%/SOPIA 의 경로를 기준으로,
+		 * @path_ 의 절대 경로를 반환한다.
+		 */
+		up(path_ = "./") {
+			return path.join(this.$store.getters.udpath, path_);
 		},
 	},
 });

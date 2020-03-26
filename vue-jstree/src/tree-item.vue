@@ -11,10 +11,10 @@
         <div role="presentation" :class="wholeRowClasses" v-if="isWholeRow">&nbsp;</div>
 		<!-- <i class="tree-icon tree-ocl" role="presentation" @click="handleItemToggle"></i> -->
 		<template v-if="isFolder">
-			<i class="fa fa-angle-down" role="presentation" @click="handleItemToggle" v-if="model.opened"></i>
-			<i class="fa fa-angle-right" role="presentation" @click="handleItemToggle" v-else></i>
+			<i class="ni ni-bold-right" style="font-size: 10pt;" role="presentation" @click="handleItemToggle" v-if="!model.opened"></i>
+			<i class="ni ni-bold-down"  style="font-size: 10pt;" role="presentation" @click="handleItemToggle" v-else></i>
 		</template>
-		<span v-else style="margin-left: 12px">
+		<span v-else style="margin-left: 17px">
 		</span>
         <div :class="anchorClasses" v-on="events" @click="isFolder && handleItemToggle()">
             <i class="tree-icon tree-checkbox" role="presentation" v-if="showCheckbox && !model.loading"></i>
@@ -111,6 +111,7 @@
               handler: function (val, oldVal) {
                   this.onItemToggle(this, this.model)
                   this.handleGroupMaxHeight()
+				  console.log("=================", this.model.opened);
               },
               deep: true
           }
