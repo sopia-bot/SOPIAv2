@@ -1,5 +1,11 @@
 <template>
 	<div class="main-content" style="overflow: hidden;">
+		<card class="context" id="context" :style="{ left: cm.left + 'px', top: cm.top + 'px', display: cm.display }">
+			<div class="list-group list-group-flush">
+				<a class="list-group-item list-group-item-action">test</a>
+				<a class="list-group-item list-group-item-action">test</a>
+			</div>
+		</card>
 		<div class="row ma-0">
 			<div class="col-4 col-md-3" style="padding-top:20px;">
 				<v-jstree
@@ -8,6 +14,7 @@
 					whole-row
 					show-checkbox
 					ref="tree"
+					:item-events="itemEvents"
 					size="large"
 					class="h4 custom text-white"
 					style="height: 100%; overflow-x: auto; font-weight:300"
@@ -53,6 +60,24 @@
 .custom li.tree-node {
 	background-image: none !important;
 }
+
+.context {
+	display: block;
+	position: absolute;
+	z-index: 100;
+	min-width: 100px;
+	margin-bottom: unset;
+	font-size: 10pt;
+}
+.context > .card-body {
+	padding: 0rem;
+}
+.context > .card-body .list-group-item {
+	padding: 0.5rem;
+}
+.context > .card-body .list-group-item-action {
+	cursor: pointer;
+}
 </style>
 <script>
 import MonacoEditor from 'vue-monaco';
@@ -76,7 +101,6 @@ export default {
 	},
 	methods: {
 		FitemClick(node, A, evt) {
-			console.log(node, evt, A);
 			if ( A.value === "folder" ) {
 				// folder something to do.
 			} else {
@@ -155,8 +179,29 @@ export default {
 					resolve(o);
 				});
 		},
+		itemContextMenu(item, A, evt) {
+			let x = evt.x;
+			let y = evt.y;
+
+			evt.target.click();
+			if ( this.$sidebar.isMinized ) {
+				x -= 62;
+			} else {
+				x -= 250;
+			}
+			this.cm.left = x;
+			this.cm.top = y;
+			this.cm.display = "block";
+
+			evt.preventDefault();
+		},
 	},
 	mounted() {
+		document.addEventListener('click', () => {
+			if ( this.cm && this.cm.display ) {
+				this.cm.display = "none";
+			}
+		});
 	},
 	data() {
 		return {
@@ -165,6 +210,14 @@ export default {
 				automaticLayout: true,
 			},
 			folderTree: [], 
+			itemEvents: {
+				contextmenu: this.itemContextMenu,
+			},
+			cm: {
+				left: 0,
+				top: 0,
+				display: 'none',
+			},
 		};
 	},
 }
