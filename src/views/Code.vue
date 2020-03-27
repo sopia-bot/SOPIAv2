@@ -2,8 +2,8 @@
 	<div class="main-content" style="overflow: hidden;">
 		<card class="context" id="context" :style="{ left: cm.left + 'px', top: cm.top + 'px', display: cm.display }">
 			<div class="list-group list-group-flush">
-				<a class="list-group-item list-group-item-action">test</a>
-				<a class="list-group-item list-group-item-action">test</a>
+				<a class="list-group-item list-group-item-action">{{ $t('code.context.rename') }}</a>
+				<a class="list-group-item list-group-item-action">{{ $t('code.context.delete') }}</a>
 			</div>
 		</card>
 		<div class="row ma-0">

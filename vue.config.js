@@ -30,5 +30,13 @@ module.exports = {
 	css: {
 		// Enable CSS source maps.
 		sourceMap: process.env.NODE_ENV !== 'production'
+	},
+	pluginOptions: {
+		i18n: {
+			locale: 'ko',
+			fallbackLocale: 'ko',
+			localeDir: 'languages',
+			enableInSFC: false
+		}
 	}
 };

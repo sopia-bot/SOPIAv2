@@ -23,6 +23,7 @@ import VueParticles from 'vue-particles';
 import Transitions from 'vue2-transitions'
 import './mixin/global.js';
 import '@/assets/css/style.css';
+import i18n from './plugins/i18n'
 
 // plugin setup
 Vue.use(DashboardPlugin);
@@ -34,4 +35,5 @@ new Vue({
 	render: h => h(App),
 	router,
 	store,
+	i18n,
 }).$mount('#app');
