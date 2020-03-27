@@ -18,7 +18,7 @@
 				:clickEffect="true"
 				clickMode="repulse">
 			</vue-particles>
-			<side-bar>
+			<side-bar class="custom">
 				<template slot-scope="props" slot="links">
 					<sidebar-item
 						v-for="(item, idx) in sideItems"
@@ -63,7 +63,13 @@
 		</div>
 	</div>
 </template>
-<style>
+<style scope>
+div.sidenav.custom li.nav-item a.nav-link span.nav-link-text {
+	margin-left: 1rem;
+}
+div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
+	margin-left: calc( 1rem - 3.5px );
+}
 .ma-0 {
 	margin: 0;
 }

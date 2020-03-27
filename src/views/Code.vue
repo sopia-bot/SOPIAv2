@@ -5,8 +5,8 @@
 				<v-jstree
 					:data="folderTree"
 					:async="folderTreeAsync"
-					allow-batch
 					whole-row
+					show-checkbox
 					ref="tree"
 					size="large"
 					class="h4 custom text-white"
@@ -50,7 +50,7 @@
 	font-weight: 400;
 }
 
-li.tree-node {
+.custom li.tree-node {
 	background-image: none !important;
 }
 </style>
@@ -75,8 +75,23 @@ export default {
 		VJstree,
 	},
 	methods: {
-		FitemClick(evt) {
-			console.log(evt);
+		FitemClick(node, A, evt) {
+			console.log(node, evt, A);
+			if ( A.value === "folder" ) {
+				// folder something to do.
+			} else {
+				const file = A.value;
+				if ( fs.existsSync(file) ) {
+					fs.readFile(file, { encoding: 'utf-8' }, (err, data) => {
+						if ( err ) {
+							console.error(err);
+							return;
+						}
+
+						this.code = data;
+					});
+				}
+			}
 		},
 		checkFolder () {
 			return new Promise((resolve, reject) => {
@@ -118,9 +133,11 @@ export default {
 						if ( stats.isDirectory() ) {
 							obj["icon"] = "fa fa-folder";
 							obj["children"] = readdir(path.join(target, f));
+							obj["value"] = "folder";
 						} else {
 							obj["icon"] = iconFinder(path.extname(f));
 							obj["children"] = [];
+							obj["value"] = path.join(target, f);
 						}
 
 						arr.push(obj);
@@ -143,7 +160,7 @@ export default {
 	},
 	data() {
 		return {
-			code: 'const noop = () => {}',
+			code: '',
 			editorOption: {
 				automaticLayout: true,
 			},
