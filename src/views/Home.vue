@@ -1,5 +1,7 @@
 <template>
-    <div>Hello Home</div>
+    <div>Hello Home
+        <i class="ni ni-air-baloon"></i>
+    </div>
 </template>
 <script>
 export default {

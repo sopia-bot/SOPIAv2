@@ -1,8 +1,8 @@
 {
 	"code": {
 		"context": {
-			"rename": "파일 이름 변경",
-			"delete": "파일 삭제"
+			"rename": "이름 변경",
+			"delete": "삭제"
 		}
 	}
 }

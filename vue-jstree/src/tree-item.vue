@@ -111,7 +111,6 @@
               handler: function (val, oldVal) {
                   this.onItemToggle(this, this.model)
                   this.handleGroupMaxHeight()
-				  console.log("=================", this.model.opened);
               },
               deep: true
           }

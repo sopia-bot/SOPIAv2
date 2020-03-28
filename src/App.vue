@@ -63,46 +63,6 @@
 		</div>
 	</div>
 </template>
-<style scope>
-div.sidenav.custom li.nav-item a.nav-link span.nav-link-text {
-	margin-left: 1rem;
-}
-div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
-	margin-left: calc( 1rem - 3.5px );
-}
-.ma-0 {
-	margin: 0;
-}
-.pa-0 {
-	padding: 0;
-}
-
-.main-content {
-	min-height: 100vh;
-}
-
-.particle-wrapper {
-	background-color: rgba(0, 0, 0, 0.5);
-	min-height: 100vh;
-}
-.wrapper {
-	background-image: url('assets/imgs/wallpaper.jpg');
-	background-size: cover;
-}
-#particles-js {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-}
-.close-sidebar-icon {
-	padding: 0.675rem 1.5rem;
-	color: #ced4da;
-}
-.close-sidebar-icon:hover {
-	color: #adb5bd; }
-</style>
 <script>
 
 export default {
@@ -163,3 +123,37 @@ export default {
 	}
 }
 </script>
+<style scope>
+div.sidenav.custom li.nav-item a.nav-link span.nav-link-text {
+	margin-left: 1rem;
+}
+div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
+	margin-left: calc( 1rem - 3.5px );
+}
+.ma-0 {
+	margin: 0;
+}
+.pa-0 {
+	padding: 0;
+}
+
+.main-content {
+	min-height: 100vh;
+}
+
+.particle-wrapper {
+	background-color: rgba(0, 0, 0, 0.5);
+	min-height: 100vh;
+}
+.wrapper {
+	background-image: url('assets/imgs/wallpaper.jpg');
+	background-size: cover;
+}
+#particles-js {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+</style>

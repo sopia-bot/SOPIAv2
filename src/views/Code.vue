@@ -1,11 +1,27 @@
 <template>
 	<div class="main-content" style="overflow: hidden;">
+		<!-- S:ContextMenu -->
 		<card class="context" id="context" :style="{ left: cm.left + 'px', top: cm.top + 'px', display: cm.display }">
 			<div class="list-group list-group-flush">
-				<a class="list-group-item list-group-item-action">{{ $t('code.context.rename') }}</a>
-				<a class="list-group-item list-group-item-action">{{ $t('code.context.delete') }}</a>
+				<a class="list-group-item list-group-item-action" href="#" @click="renameShow">{{ $t('code.context.rename') }}</a>
+				<a class="list-group-item list-group-item-action" href="#">{{ $t('code.context.delete') }}</a>
 			</div>
 		</card>
+		<!-- E:ContextMenu -->
+		<!-- S:RenameInput -->
+		<div class="rename-input" :style="{ display: cm.rename.display }" @click="cm.rename.display = 'none'; rename">
+			<card :style="{ left: cm.left + 'px', top: cm.top + 'px' }" @click.stop="cm.rename.display = 'block'">
+				<input
+					ref="rename-input"
+					type="text"
+					:placeholder="$t('code.context.rename')"
+					class="form-control"
+					v-model="cm.rename.value"
+					@keydown="inputKeyEvt"
+					@click.stop="cm.rename.display = 'block'">
+			</card>
+		</div>
+		<!-- E:RenameInput -->
 		<div class="row ma-0">
 			<div class="col-4 col-md-3" style="padding-top:20px;">
 				<v-jstree
@@ -14,6 +30,7 @@
 					whole-row
 					show-checkbox
 					ref="tree"
+					v-if="jstreeRender"
 					:item-events="itemEvents"
 					size="large"
 					class="h4 custom text-white"
@@ -31,54 +48,6 @@
 		</div>
 	</div>
 </template>
-<style scope>
-.editor {
-	width: 100%;
-	height: 100vh;
-}
-.editor > .monaco-editor {
-	margin: 0;
-	width: 100% !important;
-}
-.editor > .monaco-editor > .overflow-guard {
-	margin: 0;
-	width: 100% !important;
-}
-
-.custom .fa-js {
-	color: #ffff59;
-}
-
-.custom .fa-folder {
-	color: #f2a200;
-}
-
-.custom span {
-	font-weight: 400;
-}
-
-.custom li.tree-node {
-	background-image: none !important;
-}
-
-.context {
-	display: block;
-	position: absolute;
-	z-index: 100;
-	min-width: 100px;
-	margin-bottom: unset;
-	font-size: 10pt;
-}
-.context > .card-body {
-	padding: 0rem;
-}
-.context > .card-body .list-group-item {
-	padding: 0.5rem;
-}
-.context > .card-body .list-group-item-action {
-	cursor: pointer;
-}
-</style>
 <script>
 import MonacoEditor from 'vue-monaco';
 import VJstree from 'vue-jstree';
@@ -184,7 +153,7 @@ export default {
 			let y = evt.y;
 
 			evt.target.click();
-			if ( this.$sidebar.isMinized ) {
+			if ( this.$sidebar.isMinimized ) {
 				x -= 62;
 			} else {
 				x -= 250;
@@ -193,13 +162,57 @@ export default {
 			this.cm.top = y;
 			this.cm.display = "block";
 
+			this.cm.target = item;
 			evt.preventDefault();
 		},
+		inputKeyEvt(evt) {
+			switch(evt.keyCode) {
+				case 13: // Enter
+					this.rename();
+				case 27: // ESC
+					this.cm.rename.display = 'none';
+					break;
+			}
+		},
+		renameShow() {
+			this.cm.rename.display = 'block';
+			setTimeout(() => {
+				this.cm.rename.value = this.cm.target.data.text;
+				this.$refs['rename-input'].focus();
+			}, 50);
+		},
+		rename() {
+			const A = this.cm.target.data;
+			const fullPath = A.value;
+			const dir = path.dirname(fullPath);
+			const dst = this.cm.rename.value;
+			const dstPath = path.join(dir, dst);
+
+			fs.rename(fullPath, dstPath, (err) => {
+				if ( err ) {
+					console.error(err);
+					return;
+				}
+
+
+				this.folderTree = this.buildFolderTree(this.up('sopia'));
+				console.log(this.folderTree);
+				this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
+				this.jstreeForceRenderer();
+			});
+		},
+		jstreeForceRenderer() {
+			this.jstreeRender = false;
+			this.$nextTick(() => {
+				this.jstreeRender = true;
+			});
+		}
 	},
 	mounted() {
 		document.addEventListener('click', () => {
 			if ( this.cm && this.cm.display ) {
 				this.cm.display = "none";
+				//this.cm.target = null;
 			}
 		});
 	},
@@ -217,8 +230,90 @@ export default {
 				left: 0,
 				top: 0,
 				display: 'none',
+				target: null,
+				rename: {
+					display: 'none',
+					value: '',
+				},
 			},
+			jstreeRender: true,
 		};
 	},
 }
 </script>
+<style scope>
+.editor {
+	width: 100%;
+	height: 100vh;
+}
+.editor > .monaco-editor {
+	margin: 0;
+	width: 100% !important;
+}
+.editor > .monaco-editor > .overflow-guard {
+	margin: 0;
+	width: 100% !important;
+}
+
+.custom .fa-js {
+	color: #ffff59;
+}
+
+.custom .fa-folder {
+	color: #f2a200;
+}
+
+.custom span {
+	font-weight: 400;
+}
+
+.custom li.tree-node {
+	background-image: none !important;
+}
+
+.context {
+	display: block;
+	position: absolute;
+	z-index: 100;
+	min-width: 100px;
+	margin-bottom: unset;
+	font-size: 10pt;
+}
+.context > .card-body {
+	padding: 0rem;
+}
+.context > .card-body .list-group-item {
+	padding: 0.5rem;
+}
+.rename-input {
+	width:100%;
+	height:100vh;
+	position: absolute;
+	z-index: 999;
+	background: rgba(0, 0, 0, 0.5);
+}
+.rename-input .card {
+	display: inline-block;
+	border-radius: 0;
+	background: rgba(67, 72, 102, 0.7);
+}
+.rename-input .card,
+.rename-input .form-group,
+.rename-input .form-group .valid-feedback {
+	margin-top:0;
+	margin-bottom:0;
+}
+.rename-input .card-body {
+	padding: 5px;
+}
+.rename-input input.form-control {
+	background: transparent;
+	padding: 0 5px;
+	height: 30px;
+	border-radius: 0;
+	color: white;
+}
+.rename-input input.form-control:focus {
+	background: rgba(67, 72, 102, 0.7);
+}
+</style>
