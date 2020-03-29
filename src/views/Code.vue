@@ -70,25 +70,21 @@ export default {
 	},
 	methods: {
 		FitemClick(node, A, evt) {
-			if ( A.value === "folder" ) {
+			if ( A.isFolder ) {
 				// folder something to do.
 			} else {
 				const file = A.value;
 				if ( fs.existsSync(file) ) {
-					fs.readFile(file, { encoding: 'utf-8' }, (err, data) => {
-						if ( err ) {
-							console.error(err);
-							return;
-						}
-
-						this.code = data;
-					});
+					const data = fs.readFileSync(file, { encoding: 'utf-8' });
+					this.code = data;
+				} else {
+					console.warn(file, 'not exists');
 				}
 			}
 		},
 		checkFolder () {
 			return new Promise((resolve, reject) => {
-				const dist = path.join(this.$store.getters.udpath, 'sopia');
+				const dist = this.up('sopia');
 				if ( !fs.existsSync(dist) ) {
 					const src = this.p('sopia');
 					ncp(src, dist, () => {
@@ -100,7 +96,9 @@ export default {
 			});
 		},
 		buildFolderTree(src) {
-			const readdir = (path_, _d = "") => {
+			const ori = this.oriFolderTree;
+			const readdir = (path_, _d = "", ori_) => {
+				_d = _d || "";
 				const target = path.join(_d, path_);
 				const fll = fs.readdirSync(target);
 				const arr = [];
@@ -118,19 +116,47 @@ export default {
 					});
 
 					fl.forEach(f => {
-						const stats = fs.statSync(path.join(target,f));
+						const fullPath = path.join(target,f);
+						const stats = fs.statSync(fullPath);
 						const obj = {};
+						const oriObjIdx = Array.isArray(ori_) ? ori_.findIndex((oo) => {
+							if ( oo["value"] === fullPath ) return true;
+							if ( oo["value"] === this.cm.rename.value ) return true;
+						}) : -1;
+						const oriObj = oriObjIdx >= 0 ? ori_[oriObjIdx] : null;
 
 						obj["text"] = f;
+						obj["value"] = fullPath;
+
+						if ( ori.length === 0 && fullPath === path.join(this.up('sopia'), 'main.js') ) {
+							obj["selected"] = true;
+						}
+
+						if ( oriObj ) {
+							obj["selected"] = oriObj["selected"] ? true : false;
+						}
 
 						if ( stats.isDirectory() ) {
 							obj["icon"] = "fa fa-folder";
-							obj["children"] = readdir(path.join(target, f));
-							obj["value"] = "folder";
+							obj["children"] = readdir(fullPath, "", oriObj ? oriObj.children : null);
+							obj["isFolder"] = true;
+
+							if ( oriObj ) {
+								obj["opened"] = oriObj["opened"] ? true : false;
+							}
 						} else {
 							obj["icon"] = iconFinder(path.extname(f));
 							obj["children"] = [];
-							obj["value"] = path.join(target, f);
+
+							if ( obj["selected"] === true ) {
+								const file = obj["value"];
+								if ( fs.existsSync(file) ) {
+									const data = fs.readFileSync(file, { encoding: 'utf-8' });
+									this.code = data;
+								} else {
+									console.warn(file, 'not exists');
+								}
+							}
 						}
 
 						arr.push(obj);
@@ -139,7 +165,7 @@ export default {
 
 				return arr;
 			};
-			return readdir(src);
+			return readdir(src, "", ori);
 		},
 		folderTreeAsync(oriNode, resolve) {
 			this.checkFolder()
@@ -188,18 +214,13 @@ export default {
 			const dst = this.cm.rename.value;
 			const dstPath = path.join(dir, dst);
 
-			fs.rename(fullPath, dstPath, (err) => {
-				if ( err ) {
-					console.error(err);
-					return;
-				}
+			fs.renameSync(fullPath, dstPath);
 
-
-				this.folderTree = this.buildFolderTree(this.up('sopia'));
-				console.log(this.folderTree);
-				this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
-				this.jstreeForceRenderer();
-			});
+			this.cm.rename.value = fullPath;
+			this.oriFolderTree = this.folderTree;
+			this.folderTree = this.buildFolderTree(this.up('sopia'));
+			this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
+			this.jstreeForceRenderer();
 		},
 		jstreeForceRenderer() {
 			this.jstreeRender = false;
@@ -223,6 +244,8 @@ export default {
 				automaticLayout: true,
 			},
 			folderTree: [], 
+			oriFolderTree: [],
+			selected: null,
 			itemEvents: {
 				contextmenu: this.itemContextMenu,
 			},
