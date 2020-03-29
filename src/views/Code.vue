@@ -24,7 +24,29 @@
 			</card>
 		</div>
 		<!-- E:RenameInput -->
-		<div class="row ma-0">
+		<!-- S:Notification -->
+		<modal :show.sync="notiShow"
+               gradient="danger"
+               modal-classes="modal-danger modal-dialog-centered">
+            <h6 slot="header" class="modal-title" id="modal-title-notification">{{ $t('code.noti.syntax-error')}}</h6>
+
+            <div class="py-3 text-center">
+                <i class="ni ni-bell-55 ni-3x"></i>
+                <h4 class="heading mt-4">{{ $t('code.noti.check-line')}} &lt;{{ notification.line }}&gt;</h4>
+                <pre class="text-white">{{ notification.syntax }}</pre>
+				<p>{{ notification.msg }}</p>
+            </div>
+
+            <template slot="footer">
+                <base-button type="link"
+                             class="ml-auto text-white"
+                             @click="notiShow = false">
+                    Close
+                </base-button>
+            </template>
+        </modal>
+		<!-- S:Notification -->
+		<div class="row ma-0" style="height: calc(100vh - 64px)">
 			<div class="col-4 col-md-3" style="padding-top:20px;">
 				<v-jstree
 					:data="folderTree"
@@ -45,6 +67,7 @@
 					class="editor"
 					v-model="code"
 					language="javascript"
+					@editorDidMount="editorDidMount"
 					:options="editorOption"/>
 			</div>
 		</div>
@@ -80,6 +103,7 @@ export default {
 				if ( fs.existsSync(file) ) {
 					const data = fs.readFileSync(file, { encoding: 'utf-8' });
 					this.code = data;
+					this.selectPath = file;
 				} else {
 					console.warn(file, 'not exists');
 				}
@@ -161,6 +185,7 @@ export default {
 								if ( fs.existsSync(file) ) {
 									const data = fs.readFileSync(file, { encoding: 'utf-8' });
 									this.code = data;
+									this.selectPath = file;
 								} else {
 									console.warn(file, 'not exists');
 								}
@@ -187,11 +212,16 @@ export default {
 			let y = evt.y;
 
 			evt.target.click();
-			if ( this.$sidebar.isMinimized ) {
-				x -= 62;
-			} else {
-				x -= 250;
+
+			if ( window.innerWidth >= 1200 ) {
+				if ( this.$sidebar.isMinimized ) {
+					x -= 62;
+				} else {
+					x -= 250;
+				}
 			}
+
+			y -= 64;
 			this.cm.left = x;
 			this.cm.top = y;
 			this.cm.display = "block";
@@ -274,7 +304,21 @@ export default {
 			this.folderTree = this.buildFolderTree(this.up('sopia'));
 			this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
 			this.jstreeForceRenderer();
-		}
+		},
+		editorDidMount(editor) {
+			editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
+				fs.writeFileSync(this.selectPath, editor.getValue(), {encoding: 'utf8'});
+				try {
+					const rtn = this.jsSyntax(this.selectPath);
+					this.notification = rtn;
+					this.notiShow = !rtn.result;
+
+					// TODO: 성공시 Snackbar 를 띄움.
+				} catch(err) {
+					// TODO: 실패시 Snackbar 를 띄움.
+				}
+			});
+		},
 	},
 	mounted() {
 		document.addEventListener('click', () => {
@@ -308,6 +352,9 @@ export default {
 			},
 			jstreeRender: true,
 			inputType: '',
+			selectPath: null,
+			notification: { result: true },
+			notiShow: false,
 		};
 	},
 }
@@ -315,7 +362,7 @@ export default {
 <style scope>
 .editor {
 	width: 100%;
-	height: 100vh;
+	height: 100%;
 }
 .editor > .monaco-editor {
 	margin: 0;

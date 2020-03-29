@@ -55,6 +55,24 @@
 
 			</side-bar>
 			<div class="main-content" @click="sidebarClose">
+				<base-nav class="navbar navbar-expand navbar-dark custom">
+					<a slot="brand" class="navbar-brand text-gray" href="#">{{ $route.name }}</a>
+					
+					<ul class="navbar-nav align-items-center ml-auto">
+						<li class="nav-item">
+							<div class="pr-3 sidenav-toggler"
+								:class="{active: $sidebar.showSidebar}"
+								@click.stop="toggle">
+								<div class="sidenav-toggler-inner">
+									<i class="sidenav-toggler-line"></i>
+									<i class="sidenav-toggler-line"></i>
+									<i class="sidenav-toggler-line"></i>
+								</div>
+							</div>
+						</li>
+					</ul>
+
+				</base-nav>
 				<fade-transition :duration="200" origin="center top" mode="out-in">
 					<!-- your content here -->
 					<router-view></router-view>
@@ -70,11 +88,11 @@ export default {
 	},
 	methods: {
 		toggle() {
-			this.$sidebar.toggleMinimize();
+			this.$sidebar.displaySidebar(!this.$sidebar.showSidebar);
 		},
 		sidebarClose() {
-			if ( !this.$sidebar.isMinimized && window.innerWidth < 1200 ) {
-				this.$sidebar.toggleMinimize();
+			if ( this.$sidebar.showSidebar && window.innerWidth < 1200 ) {
+				this.$sidebar.displaySidebar(false);
 			}
 		}
     },
@@ -85,7 +103,7 @@ export default {
 			sideItems: [
 				{
 					link: {
-						name: "Dashboards",
+						name: "Dashboard",
 						icon: "fa fa-home",
 						path: "/dashboard/",
 					},
@@ -118,7 +136,8 @@ export default {
 						path: "/bundle/",
 					}
 				},
-			]
+			],
+			sidebar: "fas fa-bars",
 		}
 	}
 }
@@ -136,11 +155,6 @@ div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
 .pa-0 {
 	padding: 0;
 }
-
-.main-content {
-	min-height: 100vh;
-}
-
 .particle-wrapper {
 	background-color: rgba(0, 0, 0, 0.5);
 	min-height: 100vh;
@@ -155,5 +169,9 @@ div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
 	left: 0;
 	width: 100%;
 	height: 100%;
+}
+nav.navbar.custom {
+	background-color: white !important;
+	color: black;
 }
 </style>

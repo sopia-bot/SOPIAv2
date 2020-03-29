@@ -2,6 +2,17 @@ import Vue from 'vue';
 import { remote } from 'electron';
 const { app } = remote;
 import path from 'path';
+import fs from 'fs';
+import vm from 'vm';
+
+const jsOrPath = (code) => {
+	try {
+		if ( code.indexOf('\n') >= 0 ) return 'code';
+		if ( path.extname(code) === '.js' ) return 'path';
+	} catch(err) {
+		return 'code';
+	}
+};
 
 Vue.mixin({
 	methods: {
@@ -29,6 +40,26 @@ Vue.mixin({
 		 */
 		up(path_ = "./") {
 			return path.join(this.$store.getters.udpath, path_);
+		},
+		jsSyntax(code) {
+			if ( jsOrPath(code) === 'path' ) {
+				code = fs.readFileSync(code, { encoding: 'utf8' });
+			}
+			try {
+				vm.createScript(code);
+				return { result: true };
+			} catch(err) {
+				const sp = err.stack.split('\n');
+				const line = sp[0].split(':')[1];
+				const syntax = `${sp[1]}\n${sp[2]}`;
+				return {
+					result: false,
+					msg: err.message,
+					syntax,
+					line,
+					stack: err.stack,
+				};
+			}
 		},
 	},
 });

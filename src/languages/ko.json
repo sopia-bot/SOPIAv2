@@ -5,6 +5,10 @@
 			"newfolder": "새 폴더 만들기",
 			"rename": "이름 변경",
 			"delete": "삭제"
+		},
+		"noti": {
+			"syntax-error": "문법 에러",
+			"check-line": "다음 라인을 확인하십시오."
 		}
 	}
 }
