@@ -3,16 +3,18 @@
 		<!-- S:ContextMenu -->
 		<card class="context" id="context" :style="{ left: cm.left + 'px', top: cm.top + 'px', display: cm.display }">
 			<div class="list-group list-group-flush">
-				<a class="list-group-item list-group-item-action" href="#" @click="renameShow">{{ $t('code.context.rename') }}</a>
-				<a class="list-group-item list-group-item-action" href="#">{{ $t('code.context.delete') }}</a>
+				<a class="list-group-item list-group-item-action" href="#" @click="inputShow('newFile')">{{ $t('code.context.newfile') }}</a>
+				<a class="list-group-item list-group-item-action" href="#" @click="inputShow('newFolder')">{{ $t('code.context.newfolder') }}</a>
+				<a class="list-group-item list-group-item-action" href="#" @click="inputShow('rename')">{{ $t('code.context.rename') }}</a>
+				<a class="list-group-item list-group-item-action" href="#" @click="unlink">{{ $t('code.context.delete') }}</a>
 			</div>
 		</card>
 		<!-- E:ContextMenu -->
 		<!-- S:RenameInput -->
-		<div class="rename-input" :style="{ display: cm.rename.display }" @click="cm.rename.display = 'none'; rename">
+		<div class="rename-input" :style="{ display: cm.rename.display }" @click="inputFinish">
 			<card :style="{ left: cm.left + 'px', top: cm.top + 'px' }" @click.stop="cm.rename.display = 'block'">
 				<input
-					ref="rename-input"
+					ref="input"
 					type="text"
 					:placeholder="$t('code.context.rename')"
 					class="form-control"
@@ -54,6 +56,7 @@ import VJstree from 'vue-jstree';
 import fs from 'fs';
 import path from 'path';
 import { ncp } from 'ncp';
+import rimraf from 'rimraf';
 
 const iconFinder = (ext) => {
 	switch (ext) {
@@ -70,7 +73,7 @@ export default {
 	},
 	methods: {
 		FitemClick(node, A, evt) {
-			if ( A.isFolder ) {
+			if ( A.folder ) {
 				// folder something to do.
 			} else {
 				const file = A.value;
@@ -127,22 +130,27 @@ export default {
 
 						obj["text"] = f;
 						obj["value"] = fullPath;
+						obj["isLeaf"] = false;
 
-						if ( ori.length === 0 && fullPath === path.join(this.up('sopia'), 'main.js') ) {
+						if ( this.selected ) {
+							if ( this.selected === fullPath ) {
+								obj["selected"] = true;
+							}
+						} else if ( ori.length === 0 && fullPath === path.join(this.up('sopia'), 'main.js') ) {
 							obj["selected"] = true;
-						}
-
-						if ( oriObj ) {
+						} else if ( oriObj ) {
 							obj["selected"] = oriObj["selected"] ? true : false;
 						}
 
 						if ( stats.isDirectory() ) {
 							obj["icon"] = "fa fa-folder";
 							obj["children"] = readdir(fullPath, "", oriObj ? oriObj.children : null);
-							obj["isFolder"] = true;
+							obj["folder"] = true;
 
 							if ( oriObj ) {
 								obj["opened"] = oriObj["opened"] ? true : false;
+							} else {
+								obj["opened"] = false;
 							}
 						} else {
 							obj["icon"] = iconFinder(path.extname(f));
@@ -194,18 +202,27 @@ export default {
 		inputKeyEvt(evt) {
 			switch(evt.keyCode) {
 				case 13: // Enter
-					this.rename();
+					this[this.inputType]();
 				case 27: // ESC
 					this.cm.rename.display = 'none';
 					break;
 			}
 		},
-		renameShow() {
+		inputShow(type) {
 			this.cm.rename.display = 'block';
+			this.inputType = type;
 			setTimeout(() => {
-				this.cm.rename.value = this.cm.target.data.text;
-				this.$refs['rename-input'].focus();
+				if ( type === "rename" ) {
+					this.cm.rename.value = this.cm.target.data.text;
+				} else {
+					this.cm.rename.value = '';
+				}
+				this.$refs['input'].focus();
 			}, 50);
+		},
+		inputFinish() {
+			cm.rename.display = 'none';
+			this[this.inputType]();
 		},
 		rename() {
 			const A = this.cm.target.data;
@@ -218,15 +235,45 @@ export default {
 
 			this.cm.rename.value = fullPath;
 			this.oriFolderTree = this.folderTree;
-			this.folderTree = this.buildFolderTree(this.up('sopia'));
-			this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
-			this.jstreeForceRenderer();
+			this.jstreeReload();
+		},
+		unlink() {
+			const fullPath = this.cm.target.data.value;
+			if ( fs.existsSync(fullPath) ) {
+				rimraf.sync(fullPath);
+				this.jstreeReload();
+			}
+		},
+		newFile() {
+			const dirPath = 
+				this.cm.target.data.folder ?
+					this.cm.target.data.value :
+					path.dirname(this.cm.target.data.value);
+			const dstPath = path.join(dirPath, this.cm.rename.value);
+			fs.writeFileSync(dstPath, '');
+			this.selected = dstPath;
+			this.jstreeReload();
+		},
+		newFolder() {
+			const dirPath = 
+				this.cm.target.data.folder ?
+					this.cm.target.data.value :
+					path.dirname(this.cm.target.data.value);
+			const dstPath = path.join(dirPath, this.cm.rename.value);
+			fs.mkdirSync(dstPath);
+			this.selected = dstPath;
+			this.jstreeReload();
 		},
 		jstreeForceRenderer() {
 			this.jstreeRender = false;
 			this.$nextTick(() => {
 				this.jstreeRender = true;
 			});
+		},
+		jstreeReload() {
+			this.folderTree = this.buildFolderTree(this.up('sopia'));
+			this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
+			this.jstreeForceRenderer();
 		}
 	},
 	mounted() {
@@ -260,6 +307,7 @@ export default {
 				},
 			},
 			jstreeRender: true,
+			inputType: '',
 		};
 	},
 }

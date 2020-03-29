@@ -1,6 +1,8 @@
 {
 	"code": {
 		"context": {
+			"newfile": "새 파일 만들기",
+			"newfolder": "새 폴더 만들기",
 			"rename": "이름 변경",
 			"delete": "삭제"
 		}
