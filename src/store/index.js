@@ -10,6 +10,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
 	state: {
 		udpath: app.getPath('userData'),
+		userInfo: null
 	},
 	getters: {
 		udpath: (state) => state.udpath,

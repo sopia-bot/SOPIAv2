@@ -10,5 +10,10 @@
 			"syntax-error": "문법 에러",
 			"check-line": "다음 라인을 확인하십시오."
 		}
+	},
+	"login": {
+		"input-serial": "발급받은 시리얼을 입력하십시오.",
+		"serial": "시리얼",
+		"spoon-login": "스푼 아이디로 로그인 하십시오."
 	}
 }

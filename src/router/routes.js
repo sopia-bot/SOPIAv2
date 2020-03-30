@@ -2,7 +2,7 @@ const routes = [
 	{
 		path: '/',
 		name: 'Home',
-		redirect: '/dashboard/',
+		redirect: '/login/',
 	},
 	{
 		path: '/dashboard/',
@@ -29,6 +29,11 @@ const routes = [
 		name: 'Bundle',
 		component: () => import('@/views/Bundle.vue')
 	},
+	{
+		path: '/login/',
+		name: 'Login',
+		component: () => import('@/views/Login.vue'),
+	}
 ];
 
 export default routes;

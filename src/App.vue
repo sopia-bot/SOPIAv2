@@ -18,7 +18,7 @@
 				:clickEffect="true"
 				clickMode="repulse">
 			</vue-particles>
-			<side-bar class="custom">
+			<side-bar class="custom" v-if="$store.getters.userInfo">
 				<template slot-scope="props" slot="links">
 					<sidebar-item
 						v-for="(item, idx) in sideItems"
@@ -32,10 +32,9 @@
 						</template>
 					</sidebar-item>
 				</template>
-
 			</side-bar>
 			<div class="main-content" @click="sidebarClose">
-				<base-nav class="navbar navbar-expand navbar-dark custom">
+				<base-nav class="navbar navbar-expand navbar-dark custom" v-if="$store.getters.userInfo">
 					<a slot="brand" class="navbar-brand text-gray" href="#">{{ $route.name }}</a>
 					
 					<ul class="navbar-nav align-items-center ml-auto">
