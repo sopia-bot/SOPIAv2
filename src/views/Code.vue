@@ -16,7 +16,6 @@
 				<input
 					ref="input"
 					type="text"
-					:placeholder="$t('code.context.rename')"
 					class="form-control"
 					v-model="cm.rename.value"
 					@keydown="inputKeyEvt"
@@ -75,7 +74,7 @@
 </template>
 <script>
 import MonacoEditor from 'vue-monaco';
-import VJstree from 'vue-jstree';
+import VJstree from '@/plugins/vue-jstree.js';
 import fs from 'fs';
 import path from 'path';
 import { ncp } from 'ncp';
@@ -251,7 +250,7 @@ export default {
 			}, 50);
 		},
 		inputFinish() {
-			cm.rename.display = 'none';
+			this.cm.rename.display = 'none';
 			this[this.inputType]();
 		},
 		rename() {
@@ -275,6 +274,8 @@ export default {
 			}
 		},
 		newFile() {
+			if ( this.cm.rename.value.trim() === "" ) return;
+
 			const dirPath = 
 				this.cm.target.data.folder ?
 					this.cm.target.data.value :
@@ -285,6 +286,8 @@ export default {
 			this.jstreeReload();
 		},
 		newFolder() {
+			if ( this.cm.rename.value.trim() === "" ) return;
+
 			const dirPath = 
 				this.cm.target.data.folder ?
 					this.cm.target.data.value :

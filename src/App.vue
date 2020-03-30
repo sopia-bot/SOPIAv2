@@ -33,33 +33,13 @@
 					</sidebar-item>
 				</template>
 
-				<!--
-				<template slot="links-after">
-					<hr class="my-3">
-					<ul class="navbar-nav mb-md-3">
-						<li class="nav-item">
-							<div class="row">
-								<div class="col text-right">
-									<a class="close-sidebar-icon"
-									   href="#"
-									   @click="toggle">
-										<i v-if="$sidebar.isMinimized" class="ni ni-bold-right"></i>
-										<i v-else class="ni ni-bold-left"></i>
-									</a>
-								</div>
-							</div>
-						</li>
-					</ul>
-				</template>
-				-->
-
 			</side-bar>
 			<div class="main-content" @click="sidebarClose">
 				<base-nav class="navbar navbar-expand navbar-dark custom">
 					<a slot="brand" class="navbar-brand text-gray" href="#">{{ $route.name }}</a>
 					
 					<ul class="navbar-nav align-items-center ml-auto">
-						<li class="nav-item">
+						<li class="nav-item d-lg-none">
 							<div class="pr-3 sidenav-toggler"
 								:class="{active: $sidebar.showSidebar}"
 								@click.stop="toggle">
