@@ -4,6 +4,8 @@ const { app } = remote;
 import path from 'path';
 import fs from 'fs';
 import vm from 'vm';
+import axios from 'axios';
+import os  from 'os';
 
 import s from '../plugins/spoon.js';
 const Spoon = s.Spoon;
@@ -15,6 +17,39 @@ const jsOrPath = (code) => {
 	} catch(err) {
 		return 'code';
 	}
+};
+
+// 사용자 컴퓨터의 UUID를 생성한다.
+function generateUUID() {
+	generateUUID.tail = generateUUID.tail || (function(nics) {
+		var nic, index, addr, retn;
+		for (nic in nics) { // try to obtain the MAC address from the IPv6 scope-local address
+			for (index in nics[nic]) {
+				addr = nics[nic][index];
+				if (!addr.internal) {
+					if (addr.address.indexOf('fe80::') === 0) { // found scope-local
+						retn = retn || addr.address.slice(6).split(/:/).map(function(v, i, a) {
+							return parseInt(v, 16);
+						});
+					}
+				}
+			}
+		}
+		if (!retn) { // no IPv6 so generate random MAC with multicast bit set
+			index = Math.pow(2, 16);
+			retn = [1, 2, 3, 4];
+		}
+		retn[3] = 0x10000 | retn[3];
+		retn[2] = 0x10000 | retn[1] & 0xff00 | retn[2] & 0x00ff; // eliminate FFFE from xxxx:xxFF:FExx:xxxx
+		retn[1] = 0x10000 | retn[0] ^ 0x0200; // invert bit#41
+		retn = retn.map(function(v, i, a) {
+			return v.toString(16).slice(1)
+		});
+		return retn[0] + '-' + retn[1] + retn[2] + retn[3];
+	})(os.networkInterfaces());
+	
+	var head = [5, 6];
+	return head.concat(generateUUID.tail).join('-');
 };
 
 Vue.mixin({
@@ -74,5 +109,7 @@ Vue.mixin({
 		$remote() {
 			return remote;
 		},
+		$http: axios,
+		generateUUID,
 	},
 });

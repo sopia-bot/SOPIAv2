@@ -24,8 +24,7 @@
 										ref="user-profile"
 										class="rounded-circle ma-0"
 										:style="{ backgroundImage: 'url(' + userData.profile_url + ')' }"
-										style="width: 150px; height: 150px; background-position: center; background-repeat: no-repeat; background-size: cover">
-									</img>
+										style="width: 150px; height: 150px; background-position: center; background-repeat: no-repeat; background-size: cover" />
 								</a>
 							</div>
 						</div>
@@ -38,7 +37,7 @@
                     </div>
 					<!-- E:Login Success -->
 					<!-- S:Login Form -->
-                    <div v-else class="card-body px-lg-5 py-lg-3">
+                    <div v-else class="card-body px-lg-4 py-5">
                         <div class="text-center text-muted mb-4">
 							<small>{{ $t('login.spoon-login') }}</small>
                         </div>
@@ -72,7 +71,7 @@
 					<div v-if="isLogin" class="card-footer text-center bg-transparent">
 						<div>
 							<base-button @click="logout" type="danger" native-type="button"> {{ $t('login.logout') }}</base-button>
-							<base-button type="success" class="ml-auto" native-type="button">{{ $t('login.auth') }}</base-button>
+							<base-button @click="certification" type="success" class="ml-auto" native-type="button">{{ $t('login.auth') }}</base-button>
 						</div>
 					</div>
 					<!-- E:Footer -->
@@ -119,7 +118,6 @@ export default {
 						// login success
 						this.userData = res;
 						this.isLogin = true;
-						console.log(this.UserData, this.isLogin);
 						return;
 					}
 				})
@@ -147,7 +145,37 @@ export default {
 			this.$remote().getGlobal('clearSession')();
 			this.userData = false;
 			this.isLogin = false;
-		}
+		},
+        certification() {
+            const serial = this.form.serial.trim();
+            if ( !serial.match(/[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{4}/) ) {
+                this.noti.title = "시리얼 인증 실패";
+                this.noti.main = "XXXX-XXXX-XXXX-XXXX";
+                this.noti.sub = "시리얼 형식이 맞지 않습니다.";
+                this.noti.show = true;
+                return;
+            }
+
+            const reqUrl = `${this.$store.getters.fbUrl}/certSerial/${serial}`;
+            this.$http({
+                url: reqUrl,
+                method: 'post',
+                data: {
+                    spoon_id: this.userData.tag,
+                    mac: this.generateUUID(),
+                }
+            }).then(res => {
+                const data = res.data;
+                if ( data.result === true ) {
+
+                } else {
+                    this.noti.title = this.$t('login.error.cert-fail');
+                    this.noti.main = data.msg;
+                    this.noti.sub = "";
+                    this.noti.show = true;
+                }
+            });
+        },
 	},
 	mounted() {
 	},

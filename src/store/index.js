@@ -10,10 +10,12 @@ Vue.use(Vuex)
 export default new Vuex.Store({
 	state: {
 		udpath: app.getPath('userData'),
-		userInfo: null
+		userInfo: null,
+		fbUrl: "https://us-central1-sopia-bot.cloudfunctions.net",
 	},
 	getters: {
 		udpath: (state) => state.udpath,
+		fbUrl: (state) => state.fbUrl,
 	},
 	mutations: {
 	},
