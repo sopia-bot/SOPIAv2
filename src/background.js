@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, protocol, BrowserWindow } from 'electron'
+import { app, session, protocol, BrowserWindow } from 'electron'
 import {
 	createProtocol,
 	/* installVueDevtools */
@@ -21,6 +21,7 @@ function createWindow () {
 		height: 600,
 		webPreferences: {
 			nodeIntegration: true,
+			webSecurity: !isDevelopment,
 		} ,
 		show: false,
 	})
@@ -79,6 +80,11 @@ app.on('ready', async () => {
 		// }
 
 	}
+	session.defaultSession.webRequest.onBeforeSendHeaders((details, callback) => {
+		details.requestHeaders['User-Agent'] = "5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36";
+		details.requestHeaders['Accept-Encoding'] = "gzip, deflate, br";
+		callback({ cancel: false, requestHeaders: details.requestHeaders });
+	});
 	createWindow()
 })
 
