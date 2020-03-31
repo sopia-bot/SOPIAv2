@@ -45,6 +45,52 @@ function createWindow () {
 	})
 }
 
+
+global.snsLoginOpen = function(url) {
+	return new Promise((resolve, reject) => {
+		const snsBrowser = new BrowserWindow({
+			width: 800,
+			height: 800,
+			show: false,
+		});
+
+		snsBrowser.once('ready-to-show', () => {
+			snsBrowser.show();
+		});
+
+		snsBrowser.once('close', (evt) => {
+			const sender = evt.sender;
+			const webContents = sender.webContents;
+
+			const tout = setTimeout(() => {
+				reject(new Error('Faild get localStorage data. (Timeout)'));
+				evt.sender.close();
+			}, 5000);
+			
+			webContents.executeJavaScript(`localStorage.getItem('SPOONCAST_requestBySnsLogin')`)
+				.then(res => {
+					resolve(res);
+				})
+				.catch(reject)
+				.finally(() => {
+					clearTimeout(tout)
+					evt.sender.close();
+				});
+
+			evt.preventDefault();
+		});
+
+		snsBrowser.loadURL(url);
+	});
+};
+
+global.clearSession = function() {
+	return session.defaultSession.clearStorageData({
+			storages: [ 'cookies', 'appcache', 'shadercache' ],
+	});
+}
+
+
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
 	// On macOS it is common for applications and their menu bar
@@ -85,7 +131,7 @@ app.on('ready', async () => {
 		details.requestHeaders['Accept-Encoding'] = "gzip, deflate, br";
 		callback({ cancel: false, requestHeaders: details.requestHeaders });
 	});
-	createWindow()
+	createWindow();
 })
 
 // Exit cleanly on request from parent process in development mode.

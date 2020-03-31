@@ -5,6 +5,11 @@ const routes = [
 		redirect: '/login/',
 	},
 	{
+		path: '/spoon/',
+		name: 'Spoon',
+		component: () => import('@/views/Spoon.vue')
+	},
+	{
 		path: '/dashboard/',
 		name: 'Dashboard',
 		component: () => import('@/views/Home.vue')

@@ -14,6 +14,12 @@
 	"login": {
 		"input-serial": "발급받은 시리얼을 입력하십시오.",
 		"serial": "시리얼",
-		"spoon-login": "스푼 아이디로 로그인 하십시오."
+		"spoon-login": "스푼 아이디로 로그인 하십시오.",
+		"error": {
+			"invalid-id": "Id 형식이 올바르지 않습니다."
+		},
+		"logout": "로그아웃",
+		"auth": "인증",
+		"login": "로그인"
 	}
 }

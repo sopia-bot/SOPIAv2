@@ -38,7 +38,7 @@
 					<a slot="brand" class="navbar-brand text-gray" href="#">{{ $route.name }}</a>
 					
 					<ul class="navbar-nav align-items-center ml-auto">
-						<li class="nav-item d-lg-none">
+						<li class="nav-item d-xl-none">
 							<div class="pr-3 sidenav-toggler"
 								:class="{active: $sidebar.showSidebar}"
 								@click.stop="toggle">
@@ -80,6 +80,13 @@ export default {
 	data() {
 		return {
 			sideItems: [
+				{
+					link: {
+						name: "Spoon",
+						icon: "fa fa-utensil-spoon",
+						path: "/spoon/",
+					},
+				},
 				{
 					link: {
 						name: "Dashboard",

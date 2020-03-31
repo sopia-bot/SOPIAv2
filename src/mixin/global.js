@@ -5,6 +5,9 @@ import path from 'path';
 import fs from 'fs';
 import vm from 'vm';
 
+import s from '../plugins/spoon.js';
+const Spoon = s.Spoon;
+
 const jsOrPath = (code) => {
 	try {
 		if ( code.indexOf('\n') >= 0 ) return 'code';
@@ -60,6 +63,16 @@ Vue.mixin({
 					stack: err.stack,
 				};
 			}
+		},
+		$s(token, api) {
+			if ( this._data._spoon ) {
+				return this._data._spoon;
+			}
+
+			return this._data._spoon = new Spoon(api, token);
+		},
+		$remote() {
+			return remote;
 		},
 	},
 });
