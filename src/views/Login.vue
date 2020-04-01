@@ -167,7 +167,17 @@ export default {
             }).then(res => {
                 const data = res.data;
                 if ( data.result === true ) {
+					// certification success
+					const cfg = this.$cfg('app');
 
+					// serial set
+					cfg.set('license.id', this.userData.tag);
+					cfg.set('license.serial', this.form.serial);
+
+					// user set
+					cfg.set('user', this.userData);
+
+					this.$assign('/');
                 } else {
                     this.noti.title = this.$t('login.error.cert-fail');
                     this.noti.main = data.msg;

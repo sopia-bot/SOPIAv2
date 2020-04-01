@@ -105,7 +105,6 @@ class Spoon {
 			remote.getGlobal('snsLoginOpen')(url)
 				.then(res => {
 					const data = JSON.parse(res);
-					console.log(data);
 					if ( data.status_code === 403 ) {
 						// fail
 						data.result.result_code = 0;

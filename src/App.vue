@@ -18,7 +18,7 @@
 				:clickEffect="true"
 				clickMode="repulse">
 			</vue-particles>
-			<side-bar class="custom" v-if="$store.getters.userInfo">
+			<side-bar class="custom" v-if="!isLoginPage">
 				<template slot-scope="props" slot="links">
 					<sidebar-item
 						v-for="(item, idx) in sideItems"
@@ -34,7 +34,7 @@
 				</template>
 			</side-bar>
 			<div class="main-content" @click="sidebarClose">
-				<base-nav class="navbar navbar-expand navbar-dark custom" v-if="$store.getters.userInfo">
+				<base-nav class="navbar navbar-expand navbar-dark custom" v-if="!isLoginPage">
 					<a slot="brand" class="navbar-brand text-gray" href="#">{{ $route.name }}</a>
 					
 					<ul class="navbar-nav align-items-center ml-auto">
@@ -73,12 +73,43 @@ export default {
 			if ( this.$sidebar.showSidebar && window.innerWidth < 1200 ) {
 				this.$sidebar.displaySidebar(false);
 			}
-		}
+		},
+		checkUserValid() {
+			const cfg = this.$cfg('app');
+			const licenseTag = cfg.get('license.id');
+			const userTag = cfg.get('user.tag');
+			return userTag === licenseTag;
+		},
     },
+	watch: {
+		'$route' (to, from) {
+			if ( to.path === "/" ) {
+				if ( this.checkUserValid() ) {
+					this.$assign('/spoon/');
+				} else {
+					this.$assign('/login/');
+				}
+			}
+
+			if ( to.name === "Login" ) {
+				this.isLoginPage = true;
+			} else {
+				this.isLoginPage = false;
+			}
+		}
+	},
 	mounted() {
+		if ( this.$route.path === "/" ) {
+			if ( this.checkUserValid() ) {
+				this.$assign("/spoon/");
+			} else {
+				this.$assign("/login/");
+			}
+		}
 	},
 	data() {
 		return {
+			isLoginPage: true,
 			sideItems: [
 				{
 					link: {

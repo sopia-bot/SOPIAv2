@@ -10,6 +10,9 @@ import os  from 'os';
 import s from '../plugins/spoon.js';
 const Spoon = s.Spoon;
 
+import c from '@/plugins/config.js';
+const Config = c.Config;
+
 const jsOrPath = (code) => {
 	try {
 		if ( code.indexOf('\n') >= 0 ) return 'code';
@@ -51,6 +54,10 @@ function generateUUID() {
 	var head = [5, 6];
 	return head.concat(generateUUID.tail).join('-');
 };
+
+const configs = {
+	app: new Config(path.join(app.getPath('userData'), 'config.json')),
+}
 
 Vue.mixin({
 	methods: {
@@ -111,5 +118,17 @@ Vue.mixin({
 		},
 		$http: axios,
 		generateUUID,
+		$cfg(key) {
+			return configs[key];
+		},
+		// Vue route 이동
+		$assign(url) {
+			const router = this && this.$router;
+			if ( typeof url === "string" && router ) {
+				if ( router.history.current.path !== url ) {
+					router.push({ path: url });
+				}
+			}
+		},
 	},
 });
