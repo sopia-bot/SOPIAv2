@@ -8174,6 +8174,11 @@ vue-loader@^15.8.3:
     vue-hot-reload-api "^2.3.0"
     vue-style-loader "^4.1.0"
 
+vue-loading-button@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/vue-loading-button/-/vue-loading-button-0.2.0.tgz#1e5f8bec0d79a2b6eb2a256d6e21b84e9d88449e"
+  integrity sha512-HjlNzS2deIaXGr7cZU/J/SiaZfA6OvJC+vzujTohUCs0cF+6G9p4SfTquT4watDFl5m3yO4OBEaxhE99JQLBNA==
+
 vue-monaco@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/vue-monaco/-/vue-monaco-1.1.0.tgz#045df2621dfe82d01e0568f1f1f84155726b33fe"

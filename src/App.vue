@@ -78,7 +78,7 @@ export default {
 			const cfg = this.$cfg('app');
 			const licenseTag = cfg.get('license.id');
 			const userTag = cfg.get('user.tag');
-			return userTag === licenseTag;
+			return (userTag || licenseTag) ? userTag === licenseTag : false;
 		},
     },
 	watch: {
@@ -99,6 +99,7 @@ export default {
 		}
 	},
 	mounted() {
+		console.log(this.checkUserValid())
 		if ( this.$route.path === "/" ) {
 			if ( this.checkUserValid() ) {
 				this.$assign("/spoon/");

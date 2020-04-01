@@ -59,9 +59,27 @@
                                         placeholder="Password">
                             </base-input>
                             <div class="text-center">
+								<!--
 								<base-button type="secondary" native-type="button" class="text-orange" @click="login">{{ $t('login.login') }}</base-button>
 								<base-button type="secondary" native-type="button" class="text-info" @click="snsLogin('facebook')">Facebook</base-button>
 								<base-button type="secondary" native-type="button" class="text-blue" @click="snsLogin('google')">Google</base-button>
+								-->
+								<VueLoadingButton
+									class="btn base-button btn-secondary text-orange"
+									@click.native="login"
+									:loading="loading.login"
+									>{{ $t('login.login') }}</VueLoadingButton>
+
+								<VueLoadingButton
+									class="btn base-button btn-secondary text-info"
+									@click.native="snsLogin('facebook')"
+									:loading="loading.facebook"
+									>Facebook</VueLoadingButton>
+								<VueLoadingButton
+									class="btn base-button btn-secondary text-orange"
+									@click.native="snsLogin('google')"
+									:loading="loading.google"
+									>Google</VueLoadingButton>
                             </div>
                         </form>
                     </div>
@@ -70,8 +88,20 @@
 					<!-- S:Footer -->
 					<div v-if="isLogin" class="card-footer text-center bg-transparent">
 						<div>
+							<!--
 							<base-button @click="logout" type="danger" native-type="button"> {{ $t('login.logout') }}</base-button>
 							<base-button @click="certification" type="success" class="ml-auto" native-type="button">{{ $t('login.auth') }}</base-button>
+							-->
+							<VueLoadingButton
+								class="btn base-button btn-danger text-white"
+								@click.native="logout"
+								:loading="false"
+								>{{ $t('login.logout') }}</VueLoadingButton>
+							<VueLoadingButton
+								class="btn base-button btn-success text-white"
+								@click.native="certification"
+								:loading="loading.cert"
+								>{{ $t('login.auth') }}</VueLoadingButton>
 						</div>
 					</div>
 					<!-- E:Footer -->
@@ -108,12 +138,19 @@
     </div>
 </template>
 <script>
+import VueLoadingButton from 'vue-loading-button';
+
 export default {
-    name: 'Login',
+	name: 'Login',
+	components: {
+		VueLoadingButton,
+	},
 	methods: {
 		login() {
+			this.loading.login = true;
 			this.$s().login(this.form.id, this.form.passwd)
 				.then(res => {
+					this.loading.login = false;
 					if ( res.result_code === 1 ) {
 						// login success
 						this.userData = res;
@@ -122,12 +159,18 @@ export default {
 					}
 				})
 				.catch(err => {
-					console.error(this.$t(err.message));
+					this.loading.login = false;
+					this.noti.title = this.$t('login.error.login-fail');
+					this.noti.main = this.$t(err.message);
+					this.noti.sub = "";
+					this.noti.show = true;
 				});
 		},
 		snsLogin(type) {
+			this.loading[type] = true;
 			this.$s().snsLogin(type)
 				.then(res => {
+					this.loading[type] = false;
 					if ( res.result_code === 1 ) {
 						this.userData = res;
 						this.isLogin = true;
@@ -139,6 +182,15 @@ export default {
 					this.noti.main = res.ban_info.main;
 					this.noti.sub = res.ban_info.sub;
 					this.noti.show = true;
+				})
+				.catch(err => {
+					this.loading[type] = false;
+					/*
+					this.noti.title = this.$t('login.error.login-fail');
+					this.noti.main = this.$t(err.message);
+					this.noti.sub = "";
+					this.noti.show = true;
+					*/
 				});
 		},
 		logout() {
@@ -147,12 +199,14 @@ export default {
 			this.isLogin = false;
 		},
         certification() {
-            const serial = this.form.serial.trim();
+			const serial = this.form.serial.trim();
+			this.loading.cert = true;
             if ( !serial.match(/[A-Z]{4}-[A-Z]{4}-[A-Z]{4}-[0-9]{4}/) ) {
-                this.noti.title = "시리얼 인증 실패";
+                this.noti.title = this.$t('login.error.serial-cert-fail');
                 this.noti.main = "XXXX-XXXX-XXXX-XXXX";
-                this.noti.sub = "시리얼 형식이 맞지 않습니다.";
-                this.noti.show = true;
+                this.noti.sub = this.$t('login.error.invalid-serial');
+				this.noti.show = true;
+				this.loading.cert = false;
                 return;
             }
 
@@ -165,6 +219,7 @@ export default {
                     mac: this.generateUUID(),
                 }
             }).then(res => {
+				this.loading.cert = false;
                 const data = res.data;
                 if ( data.result === true ) {
 					// certification success
@@ -184,7 +239,9 @@ export default {
                     this.noti.sub = "";
                     this.noti.show = true;
                 }
-            });
+            }).catch(err => {
+				this.loading.cert = false;
+			});
         },
 	},
 	mounted() {
@@ -204,6 +261,12 @@ export default {
 				main: "",
 				sub: "",
 			},
+			loading: {
+				login: false,
+				facebook: false,
+				google: false,
+				cert: false,
+			},
 			isLogin: false,
         }
     }
@@ -212,5 +275,9 @@ export default {
 <style scope>
 .custom .modal-body {
 	padding: 0;
+}
+.btn {
+	font-size: 0.875rem !important;
+	padding: 0.7rem 1rem !important;
 }
 </style>

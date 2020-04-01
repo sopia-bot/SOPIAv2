@@ -16,8 +16,11 @@
 		"serial": "시리얼",
 		"spoon-login": "스푼 아이디로 로그인 하십시오.",
 		"error": {
+			"serial-cert-fail": "시리얼 인증 실패",
+			"invalid-seiral": "시리얼 형식이 맞지 않습니다.",
 			"invalid-id": "Id 형식이 올바르지 않습니다.",
-			"cert-fail": "인증 실패"
+			"cert-fail": "인증 실패",
+			"login-fail": "로그인 실패"
 		},
 		"logout": "로그아웃",
 		"auth": "인증",
