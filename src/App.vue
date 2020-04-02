@@ -1,5 +1,15 @@
 <template>
 	<div class="wrapper">
+		<base-button
+			type="secondary"
+			size="sm"
+			class="nav-toggle-btn d-xl-none"
+			@click="toggle"
+			:style="{ left: sideOpen ? '250px' : '0px' }"
+			v-if="!isLoginPage">
+			<i class="ni ni-bold-left" v-if="sideOpen"></i>
+			<i class="ni ni-bold-right" v-else></i>
+		</base-button>
 		<div class="particle-wrapper">
 			<vue-particles
 				color="#f1f1f1"
@@ -34,24 +44,6 @@
 				</template>
 			</side-bar>
 			<div class="main-content" @click="sidebarClose">
-				<base-nav class="navbar navbar-expand navbar-dark custom" v-if="!isLoginPage">
-					<a slot="brand" class="navbar-brand text-gray" href="#">{{ $route.name }}</a>
-					
-					<ul class="navbar-nav align-items-center ml-auto">
-						<li class="nav-item d-xl-none">
-							<div class="pr-3 sidenav-toggler"
-								:class="{active: $sidebar.showSidebar}"
-								@click.stop="toggle">
-								<div class="sidenav-toggler-inner">
-									<i class="sidenav-toggler-line"></i>
-									<i class="sidenav-toggler-line"></i>
-									<i class="sidenav-toggler-line"></i>
-								</div>
-							</div>
-						</li>
-					</ul>
-
-				</base-nav>
 				<fade-transition :duration="200" origin="center top" mode="out-in">
 					<!-- your content here -->
 					<router-view></router-view>
@@ -67,10 +59,12 @@ export default {
 	},
 	methods: {
 		toggle() {
+			this.sideOpen = !this.sideOpen;
 			this.$sidebar.displaySidebar(!this.$sidebar.showSidebar);
 		},
 		sidebarClose() {
 			if ( this.$sidebar.showSidebar && window.innerWidth < 1200 ) {
+				this.sideOpen = false;
 				this.$sidebar.displaySidebar(false);
 			}
 		},
@@ -99,7 +93,7 @@ export default {
 		}
 	},
 	mounted() {
-		console.log(this.checkUserValid())
+		console.log(this.$sidebar)
 		if ( this.$route.path === "/" ) {
 			if ( this.checkUserValid() ) {
 				this.$assign("/spoon/");
@@ -110,7 +104,8 @@ export default {
 	},
 	data() {
 		return {
-			isLoginPage: true,
+			isLoginPage: false,
+			sideOpen: false,
 			sideItems: [
 				{
 					link: {
@@ -188,8 +183,16 @@ div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
 	width: 100%;
 	height: 100%;
 }
-nav.navbar.custom {
-	background-color: white !important;
-	color: black;
+
+.nav-toggle-btn {
+	border-radius: 0;
+	position:absolute;
+	top:0;
+	z-index:100;
+}
+
+.nav-toggle-btn:hover {
+	-webkit-transform: unset;
+	transform: unset;
 }
 </style>
