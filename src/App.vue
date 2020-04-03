@@ -90,6 +90,8 @@ export default {
 			} else {
 				this.isLoginPage = false;
 			}
+
+			this.sideOpen = false;
 		}
 	},
 	mounted() {
