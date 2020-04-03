@@ -1,15 +1,17 @@
 import axios from 'axios';
 import electron from 'electron';
 const { remote } = electron;
+import Live from './live.js';
 
 class Spoon {
 	constructor(api, token) {
 		this.api = api || "https://api.spooncast.net";
 		this.home = "https://spooncast.net";
-		this.token = token;
+		this.token = token || "Token testtesttesttest";
 		this.next = "";
 		this.prev = "";
 		this.ll = [];
+		this.Lives = {};
 	}
 
 	$req(method, url, data) {
@@ -114,6 +116,24 @@ class Spoon {
 				})
 				.catch(reject);
 		});
+	}
+
+	$live(live_id, _config) {
+		const l = this.Lives[live_id];
+		if ( l ) {
+			return l;
+		}
+
+		const config = {
+			auth: this.token.replace("Token ", ""),
+		};
+
+		const ckeys = Object.keys(_config || {});
+		ckeys.forEach((k) => {
+			config[k] = _config[k];
+		});
+
+		return this.Lives[live_id] = new Live(live_id, config);
 	}
 };
 

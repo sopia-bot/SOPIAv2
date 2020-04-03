@@ -7,7 +7,7 @@ import vm from 'vm';
 import axios from 'axios';
 import os  from 'os';
 
-import s from '../plugins/spoon.js';
+import s from '@/spoon/';
 const Spoon = s.Spoon;
 
 import c from '@/plugins/config.js';
