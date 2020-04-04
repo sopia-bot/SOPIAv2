@@ -6,10 +6,10 @@
 					<video ref="live-player"></video>
 				</div>
 				<!-- S:Right Panel -->
-				<div class="col col-6 px-3">
+				<div class="col col-6 pl-3">
 					<!-- S:Control Button -->
 					<div class="row ma-0">
-						<div class="col col-12 px-3">
+						<div v-if="!search" class="col col-10 px-3">
 							<base-button
 								@click="tabChange('live-list')"
 								:type="tab === 'live-list' ? 'primary' : 'secondary'"
@@ -19,10 +19,34 @@
 								:type="tab === 'live-chat' ? 'primary' : 'secondary'"
 								class="mr-3">{{ $t('spoon.live.chat') }}</base-button>
 						</div>
+						<div v-else class="col col-10 px-3">
+							<input
+								ref="search"
+								type="text"
+								class="form-control"
+								style="height: 43px;"
+								@keydown="searchKeyDown"
+								:placeholder="$t('spoon.please-search')"
+								v-model="sText" />
+						</div>
+						<div class="col-2 text-right pa-0 pr-2">
+							<button
+								v-if="!search"
+								@click="showSearch"
+								class="px-3 bg-secondary text-default btn base-button">
+								<i class="fas fa-search"></i>
+							</button>
+							<base-button
+								v-else
+								@click="search = false"
+								class="px-3 bg-secondary text-default btn base-button">
+								<i class="fas fa-times"></i>
+							</base-button>
+						</div>
 					</div>
 					<!-- E:Control Button -->
 					<div class="row ma-0 mt-4">
-						<div class="col col-12">
+						<div class="col col-12 pr-0">
 							<!-- S:Live List -->
 							<div
 								v-if="tab === 'live-list'"
@@ -103,6 +127,7 @@
 <script>
 import VueLoadingButton from 'vue-loading-button';
 import InfiniteLoading from 'vue-infinite-loading';
+import Hls from 'hls.js';
 
 export default {
 	name: 'Spoon',
@@ -113,6 +138,12 @@ export default {
 	methods: {
 		tabChange(tab) {
 			this.tab = tab;
+			if ( tab === "live-list" ) {
+				this.$s().getLive()
+				.then(res => {
+					this.liveList = res;
+				});
+			}
 		},
 		loadMoreLive($state) {
 			this.loadMoreLiveMutex = true;
@@ -131,22 +162,70 @@ export default {
 		selectLive(liveId) {
 			const cfg = this.$cfg('app').cfg;
 			const user = cfg.user;
+
+			if ( this.live.hls ) {
+				this.live.hls.destroy();
+			}
+
 			this.$s(user.token).liveInfo(liveId)
 				.then(res => {
-					console.log(res);
+					// live hls play
+
+					/*
+					const video = this.$refs['live-player'];
+					if ( Hls.isSupported() ) {
+						this.live.hls = new Hls();
+						this.live.hls.loadSource(res.url_hls);
+						this.live.hls.attachMedia(video);
+						this.live.hls.on(Hls.Events.MANIFEST_PARSED, () => {
+							video.play();
+						});
+					} else {
+						console.error('Hls is not supported');
+					}
+					*/
+
+					// live join
+					this.live.info = this.$s(user.token).$live(liveId, { user_id: user.id });
+					this.live.info.connect();
+
 				})
 				.catch((err) => {
-					console.log(err);
+					console.error(err);
 				});
-			console.log(liveId);
 		},
+		showSearch() {
+			this.search = true;
+			setTimeout(() => {
+				this.$refs.search.focus();
+			}, 100);
+		},
+		searchKeyDown(evt) {
+			switch ( evt.keyCode ) {
+				case 13: // Enter
+					const searchLive = [];
+					this.$s().search(this.sText)
+						.then(async (res) => {
+							for ( let i=0;i<res.length;i++ ) {
+								const user = res[i];
+								if ( user.is_live ) {
+									const live = await this.$s().liveInfo(user.current_live.id)
+									searchLive.push(live);
+								}
+							};
+							console.log(searchLive);
+						});			
+					this.liveList = searchLive;		
+					break;
+			}
+		}
 	},
 	mounted() {
-		this.$s().getLiveNext()
+		this.$s().getLive()
 			.then(res => {
 				this.liveList = res;
-			})
-		console.log(this.$cfg('app'));
+			});
+
 	},
 	data() {
 		return {
@@ -154,6 +233,11 @@ export default {
 			loadMoreLiveMutex: false,
 			liveList: [],
 			tab: 'live-list',
+			live: {
+				info: null,
+			},
+			search: false,
+			sText: '',
 		};
 	},
 }
@@ -165,5 +249,8 @@ export default {
 }
 .btn.base-button.btn-secondary:hover {
 	color: #5e72e4;
+}
+.form-group {
+	margin-bottom: 0;
 }
 </style>

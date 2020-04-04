@@ -51,6 +51,18 @@ class Spoon {
 		return this.ll;
 	}
 
+	getLive() {
+		return new Promise((resolve, reject) => {
+			this.$req('get', '/lives/popular/')
+				.then(res => {
+					this.next = res.next;
+					this.ll = res.results;
+					resolve(this.ll);
+				})
+				.catch(reject);
+		});
+	}
+
 	getLiveNext() {
 		return new Promise((resolve, reject) => {
 			if ( this.next === "" ) {
@@ -65,7 +77,6 @@ class Spoon {
 				if ( this.next !== this.prev ) {
 					this.$req('get', this.next)
 						.then(res => {
-							console.log(this.prev, this.next, res);
 							if ( res.next === "" ) {
 								throw new Error('Load live finish.');
 							}
@@ -133,7 +144,7 @@ class Spoon {
 		}
 
 		const config = {
-			auth: this.token.replace("Token ", ""),
+			auth: this.token,
 		};
 
 		const ckeys = Object.keys(_config || {});
@@ -152,6 +163,18 @@ class Spoon {
 				})
 				.catch(reject);
 		});
+	}
+
+	search(keyword) {
+		return new Promise((resolve, reject) => {
+			this.$req('get', `/search/user/?keyword=${keyword}`)
+				.then(res => {
+					resolve(res.results);
+				})
+				.catch(reject);
+		});
+		
+		///search/user/?keyword=asdj
 	}
 };
 
