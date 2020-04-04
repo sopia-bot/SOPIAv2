@@ -97,12 +97,17 @@
 							<!-- S:Live Chat -->
 							<div
 								v-if="tab === 'live-chat'"
-								style="height: calc(100vh - 5rem - 64px); overflow-y:auto;"
+								style="height: calc(100vh - 5rem - 64px); overflow-y:auto; oveflow-x:hidden;"
+								ref="chat-scroll"
+								id="chat-scroll"
 								class="row ma-0">
 								<!-- S:Live Card -->
 								<div class="col col-12 pa-0">
 									<!-- S:Not Join Live -->
-									<div class="row align-items-center justify-content-center" style="height: 100%">
+									<div 
+										v-if="live.info === null"
+										class="row align-items-center justify-content-center"
+										style="height: 100%">
 										<div class="col-lg-7 col-md-10">
 											<div class="card bg-secondary border-0 mb-0">
 												<div class="card-body px-lg-3 py-lg-3 text-center">
@@ -112,6 +117,24 @@
 										</div>
 									</div>
 									<!-- E:Not Join Live -->
+									<!-- S:Live Chat Box -->
+									<div
+										v-else
+										class="row align-items-end justify-content-center"
+										style="height: 100%">
+										<div
+											class="col col-12"
+											v-for="(msg, idx) in live.msgs"
+											:key="msg.event+'-'+idx">
+											<comment
+												v-if="msg.event === 'live_message'"
+												:user-image="msg.data.author.profile_url"
+												:user-name="msg.data.author.nickname"
+												class="text-white"
+												:text="msg.data.message"/>
+										</div>
+									</div>
+									<!-- E:Live Chat Box -->
 								</div>
 								<!-- E:Live Card -->
 							</div>
@@ -128,12 +151,14 @@
 import VueLoadingButton from 'vue-loading-button';
 import InfiniteLoading from 'vue-infinite-loading';
 import Hls from 'hls.js';
+import Comment from '@/components/Feed/Comment';
 
 export default {
 	name: 'Spoon',
 	components: {
 		VueLoadingButton,
 		InfiniteLoading,
+		Comment,
 	},
 	methods: {
 		tabChange(tab) {
@@ -188,7 +213,23 @@ export default {
 					// live join
 					this.live.info = this.$s(user.token).$live(liveId, { user_id: user.id });
 					this.live.info.connect();
+					this.live.info.onmessage = (msg) => {
+						if ( msg.event === "live_health" ) return;
 
+						if ( this.live.msgs.length >= 100 ) {
+							this.live.msgs.shift();
+						}
+						this.live.msgs.push(msg);
+
+						setTimeout(() => {
+							if ( this.$refs['chat-scroll'] ) {
+								const chatScroll = this.$refs['chat-scroll'];
+								if ( chatScroll.scrollHeight - 560 <= chatScroll.scrollTop + 300 ) {
+									chatScroll.scrollTop = chatScroll.scrollHeight;
+								}
+							}
+						}, 100);
+					};
 				})
 				.catch((err) => {
 					console.error(err);
@@ -213,7 +254,6 @@ export default {
 									searchLive.push(live);
 								}
 							};
-							console.log(searchLive);
 						});			
 					this.liveList = searchLive;		
 					break;
@@ -234,7 +274,8 @@ export default {
 			liveList: [],
 			tab: 'live-list',
 			live: {
-				info: null,
+				msgs: [],
+				info: true,
 			},
 			search: false,
 			sText: '',
@@ -250,7 +291,14 @@ export default {
 .btn.base-button.btn-secondary:hover {
 	color: #5e72e4;
 }
-.form-group {
+.media-comment-text {
+	background: rgba(50, 50, 50, 0.7);
+}
+.media-comment-text h6 {
+	color: white;
+}
+.form-group,
+p {
 	margin-bottom: 0;
 }
 </style>

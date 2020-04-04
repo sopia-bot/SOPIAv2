@@ -62,7 +62,7 @@ export default class Live {
 			}
 
 			if ( typeof this.onmsgcb === "function" ) {
-				this.onmsgcb(msg);
+				this.onmsgcb(e);
 			}
 		};
 		this.ws.onopen = () => {

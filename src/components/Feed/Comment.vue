@@ -1,11 +1,15 @@
 <template>
   <div class="media media-comment">
-    <img alt="Image placeholder" class="avatar avatar-lg media-comment-avatar rounded-circle" :src="userImage">
+    <!-- <img class="avatar avatar-lg media-comment-avatar rounded-circle" :src="userImage"> -->
+    <img 
+      :style="{ backgroundImage: 'url(' + userImage + ')' }"
+      class="avatar avatar-lg media-comment-avatar rounded-circle"
+      style="width: 42px; height:42px; background-position: center; background-repeat: no-repeat; background-size: cover;">
     <div class="media-body">
       <div class="media-comment-text">
-        <h6 class="h5 mt-0">{{userName}}</h6>
+        <h6 class="h4 mt-0" :class="nameClass">{{userName}}</h6>
         <p class="text-sm lh-160" v-html="text"></p>
-        <div class="icon-actions">
+        <div class="icon-actions" v-if="viewOption">
           <a href="#" class="like active">
             <i class="ni ni-like-2"></i>
             <span class="text-muted">{{likeCount}} likes</span>
@@ -42,6 +46,14 @@
       shareCount: {
         type: Number,
         default: 0
+      },
+      viewOption: {
+        type: Boolean,
+        default: false
+      },
+      nameClass: {
+        type: String,
+        default: ""
       }
     }
   }
