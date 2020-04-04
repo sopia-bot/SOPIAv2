@@ -4,14 +4,18 @@ const { remote } = electron;
 import Live from './live.js';
 
 class Spoon {
-	constructor(api, token) {
+	constructor(token, api) {
 		this.api = api || "https://api.spooncast.net";
 		this.home = "https://spooncast.net";
-		this.token = token || "Token testtesttesttest";
+		this.token = token || "";
 		this.next = "";
 		this.prev = "";
 		this.ll = [];
 		this.Lives = {};
+	}
+
+	__getToken() {
+		return `Token ${this.token}`;
 	}
 
 	$req(method, url, data) {
@@ -61,6 +65,10 @@ class Spoon {
 				if ( this.next !== this.prev ) {
 					this.$req('get', this.next)
 						.then(res => {
+							console.log(this.prev, this.next, res);
+							if ( res.next === "" ) {
+								throw new Error('Load live finish.');
+							}
 							this.prev = this.next;
 							this.next = res.next;
 							this.ll = this.ll.concat(res.results);
@@ -134,6 +142,16 @@ class Spoon {
 		});
 
 		return this.Lives[live_id] = new Live(live_id, config);
+	}
+
+	liveInfo(live_id) {
+		return new Promise((resolve, reject) => {
+			this.$req('get', `/lives/${live_id}`)
+				.then(res => {
+					resolve(res.results[0]);
+				})
+				.catch(reject);
+		});
 	}
 };
 
