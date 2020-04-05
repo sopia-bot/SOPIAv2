@@ -156,8 +156,13 @@ class Spoon {
 	}
 
 	liveInfo(live_id) {
+		let data = undefined;
+		if ( this.token && this.token.length > 0 ) {
+			data = {};
+		}
+
 		return new Promise((resolve, reject) => {
-			this.$req('get', `/lives/${live_id}`)
+			this.$req('get', `/lives/${live_id}`, data)
 				.then(res => {
 					resolve(res.results[0]);
 				})
@@ -180,6 +185,16 @@ class Spoon {
 	subscribedLive() {
 		return new Promise((resolve, reject) => {
 			this.$req('get', '/lives/subscribed/', {})
+				.then(res => {
+					resolve(res.results);
+				})
+				.catch(reject);
+		});
+	}
+
+	likeLive(live_id) {
+		return new Promise((resolve, reject) => {
+			this.$req('post', `/lives/${live_id}/like/`, {})
 				.then(res => {
 					resolve(res.results);
 				})

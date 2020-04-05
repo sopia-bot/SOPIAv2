@@ -6,20 +6,28 @@
 					<!-- S:HLS Player -->
 					<video ref="live-player" style="width: 0px; height: 0px; position: absolute;"></video>
 					<!-- E:HLS Player -->
-					<div class="row ma-0">
+					<div class="row ma-0 align-items-center">
 						<div
 							v-for="(con, idx) in controls"
 							:key="con.title + '-' + idx"
 							:class="con.class">
-							<card>
-								<label class="card-title h5 d-flex align-items-center text-center mb-0">
-									<span class="mr-3">{{ con.title }}</span>
+							<div class="card-body bg-white rounded-lg text-center mb-0" :class="con.cardClass">
+								<label class="card-title h5 d-flex align-items-center justify-content-center mb-0">
+									<span class="mr-3" v-if="con.title.length > 0">{{ con.title }}</span>
 									<base-switch
 										v-if="con.type === 'toggle'"
 										@input="con.callback"
+										:class="con.itemClass"
 										v-model="con.model"></base-switch>
+									<button
+										v-else-if="con.type === 'icon-btn'"
+										class="btn base-button btn-primary px-3"
+										:class="con.itemClass"
+										@click="con.callback">
+										<i :class="con.icon"></i>
+									</button>
 								</label>
-							</card>
+							</div>
 							
 						</div>
 					</div>
@@ -108,7 +116,8 @@
 								<!-- E:Live Card -->
 								<div class="col col-12 align-content-center align-items-center">
 									<infinite-loading @infinite="loadMoreLive">
-										<div slot="no-more text-white">{{ $t('spoon.load-fin') }}</div>
+										<div slot="no-more" class="text-white">{{ $t('spoon.load-fin') }}</div>
+										<div slot="no-results" class="text-white">{{ $t('spoon.load-fin') }}</div>
 									</infinite-loading>
 								</div>
 							</div>
@@ -116,10 +125,10 @@
 							<!-- S:Live Chat -->
 							<div
 								v-if="tab === 'live-chat'"
-								style="height: calc(100vh - 5rem - 64px); overflow-y:auto; oveflow-x:hidden;"
+								style="height: calc(100vh - 5rem - 160px); overflow-y:auto; oveflow-x:hidden;"
 								ref="chat-scroll"
 								id="chat-scroll"
-								class="row ma-0">
+								class="row ma-0 mb-3">
 								<!-- S:Live Card -->
 								<div class="col col-12 pa-0" style="overflow-x: hidden;">
 									<!-- S:Not Join Live -->
@@ -149,6 +158,7 @@
 												v-if="msg.event === 'live_message'"
 												:user-image="msg.data.author.profile_url"
 												:user-name="msg.data.author.nickname"
+												:type="getUserType(msg.data.author)"
 												class="text-white"
 												:text="msg.data.message"/>
 										</div>
@@ -158,6 +168,26 @@
 								<!-- E:Live Card -->
 							</div>
 							<!-- E:Live Chat -->
+							<div v-if="tab === 'live-chat'" class="row ma-0">
+								<div class="col col-10">
+									<input
+										ref="search"
+										type="text"
+										class="form-control"
+										style="height: 43px;"
+										@keydown="chatKeyDown"
+										:placeholder="$t('spoon.live.input-chat')"
+										v-model="live.chat" />
+								</div>
+								<div class="col col-2 px-0">
+									<button
+										style="width:100%;"
+										@click="sendChat"
+										class="btn base-button btn-warning text-center px-2">
+										{{ $t('spoon.live.send') }}
+									</button>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -222,6 +252,31 @@ export default {
 					// live hls play
 
 					this.tab = 'live-chat';
+
+					if ( !res.is_like ) {
+						this.controls.unshift({
+							"title": "",
+							"type": "icon-btn",
+							"class": "col col-12 col-md-3",
+							"cardClass": "bg-transparent pa-0",
+							"model": false,
+							"icon": "ni ni-favourite-28",
+							"itemClass": "btn-danger",
+							"key": "like-live",
+							"callback": (state) => {
+								this.$s(user.token).likeLive(liveId)
+									.then(res => {
+										const idx = this.controls.findIndex((control => {
+											return control.key = "like-live";
+										}));
+										if ( idx >= 0 ) {
+											this.controls.splice(idx, 1);
+										}
+									});
+							}
+						});
+					}
+
 					/*
 					const video = this.$refs['live-player'];
 					if ( Hls.isSupported() ) {
@@ -240,7 +295,14 @@ export default {
 					this.live.info = this.$s(user.token).$live(liveId, { user_id: user.id });
 					this.live.info.connect();
 					this.live.info.onmessage = (msg) => {
-						if ( msg.event === "live_health" ) return;
+						if ( msg.data.live && msg.data.live.manager_ids ) {
+							this.live.data = msg.data.live;
+						}
+
+						if ( msg.event === "live_health" ||
+							 msg.event === "live_leave" ||
+							 msg.event === "live_update" ) return;
+
 
 						if ( this.live.msgs.length >= 100 ) {
 							this.live.msgs.shift();
@@ -286,12 +348,34 @@ export default {
 					this.search = false;
 					break;
 			}
-		}
+		},
+		chatKeyDown(evt) {
+			switch (evt.keyCode) {
+				case 13: // Enter
+					this.sendChat();
+					break;
+			}
+		},
+		sendChat() {
+			const chat = this.live.chat;
+			if ( chat.trim().length > 0 ) {
+				this.live.info.message(chat);
+				this.live.chat = "";
+			}
+		},
+		getUserType(author) {
+			if ( this.live.data ) {
+				if ( this.live.data.author.id === author.id ) {
+					return "dj";
+				} else if ( this.live.data.manager_ids.includes(author.id) ) {
+					return "manager";
+				}
+			}
+		},
 	},
 	mounted() {
 		const app = this.$cfg('app');
 
-		console.log(app);
 		if ( app.get('spoon.filter') ) {
 			this.$s(app.get('user.token')).subscribedLive()
 				.then(res => {
@@ -313,6 +397,8 @@ export default {
 			live: {
 				msgs: [],
 				info: true,
+				chat: "",
+				data: null,
 			},
 			search: false,
 			sText: '',
@@ -320,7 +406,7 @@ export default {
 				{
 					"title": this.$t('spoon.controls.filter'),
 					"type": "toggle",
-					"class": "col col-12 col-xl-6",
+					"class": "col col-12 col-md-6",
 					"model": this.$cfg('app').get('spoon.filter'),
 					"callback": (state) => {
 						const app = this.$cfg('app');
@@ -361,5 +447,8 @@ export default {
 .form-group,
 p {
 	margin-bottom: 0;
+}
+.bg-transparent {
+	background-color: transparent !important;
 }
 </style>

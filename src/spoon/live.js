@@ -98,4 +98,15 @@ export default class Live {
 		this.isConnect = false;
 		this.ws.close();
 	}
+
+	message(msg) {
+		this.__send({
+			message: msg.toString(),
+			appversion: this.appVersion,
+			useragent: "Web",
+			token: this.auth,
+			event: "live_message",
+			type: "live_rpt",
+		});
+	}
 }

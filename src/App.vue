@@ -198,3 +198,11 @@ div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
 	transform: unset;
 }
 </style>
+<style>
+.bg-spoon {
+	background-color: #FCBA3D !important;
+}
+.text-spoon {
+	color: #FCBA3D;
+}
+</style>
