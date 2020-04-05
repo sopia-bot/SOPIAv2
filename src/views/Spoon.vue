@@ -2,11 +2,30 @@
 	<div class="row ma-0" style="height: 100vh; overflow-y: hidden;">
 		<div class="col" style="padding: 2.5rem">
 			<div class="row ma-0" style="overflow-y: hidden;">
-				<div class="col col-6 px-3" style="background: white;">
-					<video ref="live-player"></video>
+				<div class="col col-6 px-3 my-4">
+					<!-- S:HLS Player -->
+					<video ref="live-player" style="width: 0px; height: 0px; position: absolute;"></video>
+					<!-- E:HLS Player -->
+					<div class="row ma-0">
+						<div
+							class="col col-12 col-xl-6"
+							v-for="(con, idx) in controls"
+							:key="con.title + '-' + idx">
+							<card>
+								<label class="card-title h5 d-flex align-items-center text-center mb-0">
+									<span class="mr-3">{{ con.title }}</span>
+									<base-switch
+										v-if="con.type === 'toggle'"
+										@input="con.callback"
+										v-model="con.model"></base-switch>
+								</label>
+							</card>
+							
+						</div>
+					</div>
 				</div>
 				<!-- S:Right Panel -->
-				<div class="col col-6 pl-3">
+				<div class="col col-6 px-3 my-4">
 					<!-- S:Control Button -->
 					<div class="row ma-0">
 						<div v-if="!search" class="col col-10 px-3">
@@ -163,26 +182,32 @@ export default {
 	methods: {
 		tabChange(tab) {
 			this.tab = tab;
+			/*
 			if ( tab === "live-list" ) {
 				this.$s().getLive()
 				.then(res => {
 					this.liveList = res;
 				});
 			}
+			*/
 		},
 		loadMoreLive($state) {
-			this.loadMoreLiveMutex = true;
-			this.$s().getLiveNext()
-				.then(() => {
-					$state.loaded();
-				})
-				.catch((err) => {
-					$state.complete();
-				})
-				.finally(() => {
-					this.loadMoreLiveMutex = false;
-					this.liveList = this.$s().liveList;
-				});
+			if ( !this.$cfg('app').get('spoon.filter') ) {
+				this.loadMoreLiveMutex = true;
+				this.$s().getLiveNext()
+					.then(() => {
+						$state.loaded();
+					})
+					.catch((err) => {
+						$state.complete();
+					})
+					.finally(() => {
+						this.loadMoreLiveMutex = false;
+						this.liveList = this.$s().liveList;
+					});
+			} else {
+				$state.complete();
+			}
 		},
 		selectLive(liveId) {
 			const cfg = this.$cfg('app').cfg;
@@ -261,11 +286,20 @@ export default {
 		}
 	},
 	mounted() {
-		this.$s().getLive()
-			.then(res => {
-				this.liveList = res;
-			});
+		const app = this.$cfg('app');
 
+		console.log(app);
+		if ( app.get('spoon.filter') ) {
+			this.$s(app.get('user.token')).subscribedLive()
+				.then(res => {
+					this.liveList = res;
+				});
+		} else {
+			this.$s().getLive()
+				.then(res => {
+					this.liveList = res;
+				});
+		}
 	},
 	data() {
 		return {
@@ -279,6 +313,29 @@ export default {
 			},
 			search: false,
 			sText: '',
+			controls: [
+				{
+					"title": this.$t('spoon.controls.filter'),
+					"type": "toggle",
+					"model": this.$cfg('app').get('spoon.filter'),
+					"callback": (state) => {
+						const app = this.$cfg('app');
+						app.set('spoon.filter', state);
+
+						if ( state ) {
+							this.$s(app.get('user.token')).subscribedLive()
+								.then(res => {
+									this.liveList = res;
+								});
+						} else {
+							this.$s().getLive()
+								.then(res => {
+									this.liveList = res;
+								});
+						}
+					},
+				}
+			],
 		};
 	},
 }

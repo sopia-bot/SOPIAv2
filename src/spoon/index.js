@@ -36,7 +36,7 @@ class Spoon {
 
 			if ( typeof data === "object" ) {
 				obj.data = data;
-				obj.headers['token'] = `Token ${this.token}`;
+				obj.headers.authorization = this.__getToken();
 			}
 
 			axios(obj)
@@ -175,6 +175,16 @@ class Spoon {
 		});
 		
 		///search/user/?keyword=asdj
+	}
+
+	subscribedLive() {
+		return new Promise((resolve, reject) => {
+			this.$req('get', '/lives/subscribed/', {})
+				.then(res => {
+					resolve(res.results);
+				})
+				.catch(reject);
+		});
 	}
 };
 

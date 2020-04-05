@@ -33,6 +33,9 @@
 			"chat": "라이브 채팅",
 			"not-join": "참여중인 라이브가 없습니다."
 		},
-		"please-search": "문장 입력 후 엔터로 검색"
+		"please-search": "문장 입력 후 엔터로 검색",
+		"controls": {
+			"filter": "방송 필터"
+		}
 	}
 }
