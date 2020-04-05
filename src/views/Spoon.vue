@@ -8,9 +8,9 @@
 					<!-- E:HLS Player -->
 					<div class="row ma-0">
 						<div
-							class="col col-12 col-xl-6"
 							v-for="(con, idx) in controls"
-							:key="con.title + '-' + idx">
+							:key="con.title + '-' + idx"
+							:class="con.class">
 							<card>
 								<label class="card-title h5 d-flex align-items-center text-center mb-0">
 									<span class="mr-3">{{ con.title }}</span>
@@ -121,7 +121,7 @@
 								id="chat-scroll"
 								class="row ma-0">
 								<!-- S:Live Card -->
-								<div class="col col-12 pa-0">
+								<div class="col col-12 pa-0" style="overflow-x: hidden;">
 									<!-- S:Not Join Live -->
 									<div 
 										v-if="live.info === null"
@@ -221,6 +221,7 @@ export default {
 				.then(res => {
 					// live hls play
 
+					this.tab = 'live-chat';
 					/*
 					const video = this.$refs['live-player'];
 					if ( Hls.isSupported() ) {
@@ -261,6 +262,7 @@ export default {
 				});
 		},
 		showSearch() {
+			this.sText = "";
 			this.search = true;
 			setTimeout(() => {
 				this.$refs.search.focus();
@@ -280,7 +282,8 @@ export default {
 								}
 							};
 						});			
-					this.liveList = searchLive;		
+					this.liveList = searchLive;
+					this.search = false;
 					break;
 			}
 		}
@@ -317,6 +320,7 @@ export default {
 				{
 					"title": this.$t('spoon.controls.filter'),
 					"type": "toggle",
+					"class": "col col-12 col-xl-6",
 					"model": this.$cfg('app').get('spoon.filter'),
 					"callback": (state) => {
 						const app = this.$cfg('app');
