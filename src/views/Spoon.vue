@@ -10,8 +10,10 @@
 						<div
 							v-for="(con, idx) in controls"
 							:key="con.title + '-' + idx"
+							v-if="con['v-if'] ? con['v-if']() : true"
+							class="mb-3"
 							:class="con.class">
-							<div class="card-body bg-white rounded-lg text-center mb-0" :class="con.cardClass">
+							<div class="card-body bg-white rounded-lg text-center mb-0" :class="con.cardClass || ''">
 								<label class="card-title h5 d-flex align-items-center justify-content-center mb-0">
 									<span class="mr-3" v-if="con.title.length > 0">{{ con.title }}</span>
 									<base-switch
@@ -26,6 +28,19 @@
 										@click="con.callback">
 										<i :class="con.icon"></i>
 									</button>
+									<div
+										v-else-if="con.type === 'stats'"
+										class="row ma-0">
+										<div class="col">
+											<h5 class="card-title text-uppercase text-muted mb-0">{{ con['sub-title'] }}</h5>
+											<span class="h2 font-weight-bold mb-0">{{ con.content() }}</span>
+										</div>
+										<div class="col-auto">
+											<div class="icon icon-shape rounded-circle shadow" :class="con.itemClass">
+												<i :class="con.icon"></i>
+											</div>
+										</div>
+									</div>
 								</label>
 							</div>
 							
@@ -300,7 +315,7 @@ export default {
 
 					this.tab = 'live-chat';
 
-					if ( true || !res.is_like ) {
+					if ( !res.is_like ) {
 						this.controls.unshift({
 							"title": "",
 							"type": "icon-btn",
@@ -484,6 +499,7 @@ export default {
 					"type": "toggle",
 					"class": "col col-12 col-md-6",
 					"model": this.$cfg('app').get('spoon.filter'),
+					"v-if": () => this.tab === 'live-list',
 					"callback": (state) => {
 						const app = this.$cfg('app');
 						app.set('spoon.filter', state);
@@ -500,7 +516,37 @@ export default {
 								});
 						}
 					},
-				}
+				},
+				{
+					"title": "",
+					"sub-title": this.$t('spoon.controls.listener'),
+					"type": "stats",
+					"class": "col col-12 col-md-6",
+					"content": () => this.live.data ? this.live.data.member_count : 0,
+					"v-if": () => this.tab === 'live-chat',
+					"icon": "ni ni-headphones",
+					"itemClass": "bg-default text-white",
+				},
+				{
+					"title": "",
+					"sub-title": this.$t('spoon.controls.like'),
+					"type": "stats",
+					"class": "col col-12 col-md-6",
+					"content": () => this.live.data ? this.live.data.like_count : 0,
+					"v-if": () => this.tab === 'live-chat',
+					"icon": "ni ni-favourite-28",
+					"itemClass": "bg-red text-white",
+				},
+				{
+					"title": "",
+					"sub-title": this.$t('spoon.controls.sum'),
+					"type": "stats",
+					"class": "col col-12 col-md-6",
+					"content": () => this.live.data ? this.live.data.total_member_count : 0,
+					"v-if": () => this.tab === 'live-chat',
+					"icon": "ni ni-circle-08",
+					"itemClass": "bg-spoon text-white",
+				},
 			],
 		};
 	},
