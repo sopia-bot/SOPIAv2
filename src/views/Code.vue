@@ -45,7 +45,7 @@
             </template>
         </modal>
 		<!-- S:Notification -->
-		<div class="row ma-0" style="height: calc(100vh - 64px)">
+		<div class="row ma-0" style="height: 100vh">
 			<div class="col-4 col-md-3" style="padding-top:20px;">
 				<v-jstree
 					:data="folderTree"
