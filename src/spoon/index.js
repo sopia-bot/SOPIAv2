@@ -3,6 +3,37 @@ import electron from 'electron';
 const { remote } = electron;
 import Live from './live.js';
 
+
+const SpoonImgs = {
+	"sticker_airplane": "https://www.spooncast.net/src/images/spoon/sticker_airplane_x70.9a4404ea.png",
+	"sticker_angel": "https://www.spooncast.net/src/images/spoon/sticker_angel_x70.a63292d6.png",
+	"sticker_bearflower": "https://www.spooncast.net/src/images/spoon/sticker_bearflower_x70.42ee860a.png",
+	"sticker_bubbletea": "https://www.spooncast.net/src/images/spoon/sticker_bubbletea_x70.2fcb06bc.png",
+	"sticker_cake": "https://www.spooncast.net/src/images/spoon/sticker_cake_x70.755a39f8.png",
+	"sticker_chicken": "https://www.spooncast.net/src/images/spoon/sticker_chicken_x70.d2f57fbf.png",
+	"sticker_clap": "https://www.spooncast.net/src/images/spoon/sticker_clap_x70.95c7684d.png",
+	"sticker_clover": "https://www.spooncast.net/src/images/spoon/sticker_clover_x70.469fa042.png",
+	"sticker_coffee_donut": "https://www.spooncast.net/src/images/spoon/sticker_coffee_donut_x70.041ba36c.png",
+	"sticker_coke": "https://www.spooncast.net/src/images/spoon/sticker_coke_x70.53d96e3f.png",
+	"sticker_crown": "https://www.spooncast.net/src/images/spoon/sticker_crownx70.4f33d6be.png",
+	"sticker_hamburger": "https://www.spooncast.net/src/images/spoon/sticker_hamburger_x70.9efefd0e.png",
+	"sticker_hotdog": "https://www.spooncast.net/src/images/spoon/sticker_hotdog_x70.faf017c2.png",
+	"sticker_icecream": "https://www.spooncast.net/src/images/spoon/sticker_icecream_x70.5a9f5286.png",
+	"sticker_jackpot": "https://www.spooncast.net/src/images/spoon/sticker_jackpot_x70.fccec78d.png",
+	"sticker_juice": "https://www.spooncast.net/src/images/spoon/sticker_juice_x70.22a5fbd4.png",
+	"sticker_like": "https://www.spooncast.net/src/images/spoon/sticker_like_x70.3798f504.png",
+	"sticker_lip": "https://www.spooncast.net/src/images/spoon/sticker_lip_x70.5c478667.png",
+	"sticker_myheart": "https://www.spooncast.net/src/images/spoon/sticker_myheart_x70.016e3995.png",
+	"sticker_ohohoh": "https://www.spooncast.net/src/images/spoon/sticker_ohohoh_x70.e3e7bef5.png",
+	"sticker_pizza": "https://www.spooncast.net/src/images/spoon/sticker_pizza_x70.46d4c7bd.png",
+	"sticker_potatochip": "https://www.spooncast.net/src/images/spoon/sticker_potatochip_x70.10b141c4.png",
+	"sticker_rose": "https://www.spooncast.net/src/images/spoon/sticker_rose_x70.6dc19d9c.png",
+	"sticker_santa": "https://www.spooncast.net/src/images/spoon/sticker_santa_x70.00381207.png",
+	"sticker_snack11": "https://www.spooncast.net/src/images/spoon/sticker_snack11_x70.c17b67d6.png",
+	"sticker_vday": "https://www.spooncast.net/src/images/spoon/sticker_vday_x70.96642b4d.png",
+};
+
+
 class Spoon {
 	constructor(token, api) {
 		this.api = api || "https://api.spooncast.net";
@@ -200,6 +231,10 @@ class Spoon {
 				})
 				.catch(reject);
 		});
+	}
+
+	getImg(sticker) {
+		return SpoonImgs[sticker];
 	}
 };
 

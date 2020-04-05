@@ -2,7 +2,7 @@
 	<div class="row ma-0" style="height: 100vh; overflow-y: hidden;">
 		<div class="col" style="padding: 2.5rem">
 			<div class="row ma-0" style="overflow-y: hidden;">
-				<div class="col col-6 px-3 my-4">
+				<div class="col col-6 px-3 py-4">
 					<!-- S:HLS Player -->
 					<video ref="live-player" style="width: 0px; height: 0px; position: absolute;"></video>
 					<!-- E:HLS Player -->
@@ -33,7 +33,11 @@
 					</div>
 				</div>
 				<!-- S:Right Panel -->
-				<div class="col col-6 px-3 my-4">
+				<div
+					class="col col-6 px-3 py-4"
+					:style="{
+						background: live.data && live.data.is_freeze ? 'linear-gradient( to top, lightblue, rgba(0, 0, 0, 0) )' : '',
+					}">
 					<!-- S:Control Button -->
 					<div class="row ma-0">
 						<div v-if="!search" class="col col-10 px-3">
@@ -151,9 +155,10 @@
 										class="row align-items-end justify-content-center"
 										style="height: 100%">
 										<div
-											class="col col-12"
+											class="col col-12 px-3 mt-4"
 											v-for="(msg, idx) in live.msgs"
 											:key="msg.event+'-'+idx">
+											<!-- S:Live Message -->
 											<comment
 												v-if="msg.event === 'live_message'"
 												:user-image="msg.data.author.profile_url"
@@ -161,6 +166,46 @@
 												:type="getUserType(msg.data.author)"
 												class="text-white"
 												:text="msg.data.message"/>
+											<!-- E:Live Message -->
+											<!-- S:Live Like -->
+											<div
+												v-else-if="msg.event === 'live_like'" 
+												class="alert alert-like mb-0">
+												{{ msg.data.author.nickname }}{{ $t('spoon.live.like') }}
+											</div>
+											<!-- E:Live Like -->
+											<!-- S:Live Join -->
+											<div
+												v-else-if="msg.event === 'live_join'"
+												class="alert alert-join mb-0">
+												{{ msg.data.author.nickname }}{{ $t('spoon.live.join') }}
+											</div>
+											<!-- E:Live Join -->
+											<!-- S:User Block -->
+											<div
+												v-else-if="msg.event === 'live_block'"
+												class="alert alert-block mb-0">
+												{{ msg.data.author.nickname }}{{ $t('spoon.live.block') }}
+											</div>
+											<!-- E:User Block -->
+											<!-- S:Live Present -->
+											<div
+												v-else-if="msg.event === 'live_present'"
+												class="mb-0">
+												<p>
+													<img
+														class="rounded-circle img-center img-fluid"
+														:src="$s().getImg(msg.data.sticker)">
+												</p>
+												<div class="text-center">
+													<h5 class="h1 title text-white">{{ msg.data.author.nickname }}</h5>
+													<small class="h2 font-weight-light text-white">
+														{{ msg.data.amount }}{{ $t('spoon.live.spoon') }} X 
+														<span class="font-weight-bold text-spoon">{{ msg.data.combo }}</span>
+													</small>
+												</div>
+											</div>
+											<!-- E:Live Present -->
 										</div>
 									</div>
 									<!-- E:Live Chat Box -->
@@ -176,6 +221,7 @@
 										class="form-control"
 										style="height: 43px;"
 										@keydown="chatKeyDown"
+										:disabled="live.data && live.data.is_freeze"
 										:placeholder="$t('spoon.live.input-chat')"
 										v-model="live.chat" />
 								</div>
@@ -183,6 +229,7 @@
 									<button
 										style="width:100%;"
 										@click="sendChat"
+										:disabled="live.data && live.data.is_freeze"
 										class="btn base-button btn-warning text-center px-2">
 										{{ $t('spoon.live.send') }}
 									</button>
@@ -253,7 +300,7 @@ export default {
 
 					this.tab = 'live-chat';
 
-					if ( !res.is_like ) {
+					if ( true || !res.is_like ) {
 						this.controls.unshift({
 							"title": "",
 							"type": "icon-btn",
@@ -295,17 +342,35 @@ export default {
 					this.live.info = this.$s(user.token).$live(liveId, { user_id: user.id });
 					this.live.info.connect();
 					this.live.info.onmessage = (msg) => {
-						if ( msg.data.live && msg.data.live.manager_ids ) {
+						if ( msg.event === "live_failover" ) {
+							// 연결이 끊길 때가 있다
+							this.selectLive(liveId);
+							return;
+						}
+
+
+						if ( msg && msg.data && msg.data.live && msg.data.live.manager_ids ) {
 							this.live.data = msg.data.live;
 						}
 
 						if ( msg.event === "live_health" ||
 							 msg.event === "live_leave" ||
-							 msg.event === "live_update" ) return;
+							 msg.event === "live_update" ||
+							 msg.event === "live_state" ||
+							 msg.event === "live_shadowjoin" ||
+							 msg.useragent === "Server" ) return;
 
 
 						if ( this.live.msgs.length >= 100 ) {
 							this.live.msgs.shift();
+						}
+						
+						// 메시지 개행
+						if ( msg.event === "live_message" ) {
+							msg.data.message = msg.data.message
+													.replace(/\</g, "&lt;")
+													.replace(/\>/g, "&gt;")
+													.replace(/\n/g, "<br>");
 						}
 						this.live.msgs.push(msg);
 
@@ -318,6 +383,16 @@ export default {
 							}
 						}, 100);
 					};
+					this.live.msgs.push({
+						event: "live_message",
+						data: {
+							author: res.author,
+							live: res,
+							message: res.welcome_message.replace(/\</g, "&lt;")
+													.replace(/\>/g, "&gt;")
+													.replace(/\n/g, "<br>"),
+						},
+					});
 				})
 				.catch((err) => {
 					console.error(err);
@@ -357,7 +432,8 @@ export default {
 			}
 		},
 		sendChat() {
-			const chat = this.live.chat;
+			const chat = this.live.chat
+									.replace(/\\/g, "\\\\");
 			if ( chat.trim().length > 0 ) {
 				this.live.info.message(chat);
 				this.live.chat = "";
@@ -450,5 +526,20 @@ p {
 }
 .bg-transparent {
 	background-color: transparent !important;
+}
+.alert-like {
+	color: #FCBA3D;
+    border-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.5);
+}
+.alert-join {
+	color: #fff;
+    border-color: rgba(21, 30, 46, 0.5) ;
+    background-color: rgba(21, 30, 46, 0.5);
+}
+.alert-block {
+	color: #fff;
+	border-color: rgba(201, 52, 82, 0.5);
+    background-color: rgba(201, 52, 82, 0.5);
 }
 </style>

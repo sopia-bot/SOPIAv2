@@ -1,5 +1,5 @@
 <template>
-  <div class="media media-comment">
+  <div class="media media-comment" style="margin-top: 1rem;">
     <!-- <img class="avatar avatar-lg media-comment-avatar rounded-circle" :src="userImage"> -->
     <img 
       :style="{ backgroundImage: 'url(' + userImage + ')' }"
