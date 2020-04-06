@@ -66,8 +66,11 @@ class Spoon {
 			};
 
 			if ( typeof data === "object" ) {
+				if ( reqUrl.match(/signin\/$/) ) {
+				} else {
+					obj.headers.authorization = this.__getToken();
+				}
 				obj.data = data;
-				obj.headers.authorization = this.__getToken();
 			}
 
 			axios(obj)
@@ -145,6 +148,9 @@ class Spoon {
 				sns_type: type,
 			})
 			.then(res => {
+				if ( res.results.length === 0 ) {
+					throw new Error('No have data');
+				}
 				resolve(res.results[0]);
 			})
 			.catch(reject);
@@ -235,6 +241,10 @@ class Spoon {
 
 	getImg(sticker) {
 		return SpoonImgs[sticker];
+	}
+
+	$emit(evt, msg) {
+		
 	}
 };
 
