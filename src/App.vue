@@ -50,6 +50,7 @@
 				</fade-transition>
 			</div>
 		</div>
+		<notifications></notifications>
 	</div>
 </template>
 <script>
@@ -95,7 +96,6 @@ export default {
 		}
 	},
 	mounted() {
-		console.log(this.$sidebar)
 		if ( this.$route.path === "/" ) {
 			if ( this.checkUserValid() ) {
 				this.$assign("/spoon/");

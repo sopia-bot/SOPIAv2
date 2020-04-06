@@ -8,7 +8,8 @@
 		},
 		"noti": {
 			"syntax-error": "문법 에러",
-			"check-line": "다음 라인을 확인하십시오."
+			"check-line": "다음 라인을 확인하십시오.",
+			"save-success": "파일을 성공적으로 저장했습니다."
 		}
 	},
 	"login": {

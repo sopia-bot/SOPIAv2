@@ -1,7 +1,19 @@
+// native modules
+import vm from 'vm';
+import fs from 'fs';
+import path from 'path';
+
+// package modules
 import axios from 'axios';
 import electron from 'electron';
-const { remote } = electron;
+
+// author modules
 import Live from './live.js';
+import Sopia from './sopia.js';
+
+// global variables
+const { remote } = electron;
+const { app } = remote;
 
 
 const SpoonImgs = {
@@ -33,6 +45,7 @@ const SpoonImgs = {
 	"sticker_vday": "https://www.spooncast.net/src/images/spoon/sticker_vday_x70.96642b4d.png",
 };
 
+const OBJDump = (obj) => Object.assign({}, obj);
 
 class Spoon {
 	constructor(token, api) {
@@ -43,6 +56,7 @@ class Spoon {
 		this.prev = "";
 		this.ll = [];
 		this.Lives = {};
+		this.var = {};
 	}
 
 	__getToken() {
@@ -243,8 +257,35 @@ class Spoon {
 		return SpoonImgs[sticker];
 	}
 
-	$emit(evt, msg) {
-		
+	__createContext(live_id) {
+		if ( !this.vmContext ) {
+			this.vmContext = {
+				'sopia': {
+					var: this.var,
+					itv: Sopia.itv,
+				},
+				'live': this.$live(live_id),
+				'console': console,
+			};
+		}
+		return OBJDump(this.vmContext);
+	}
+
+	$emit(live_id, evt, msg) {
+		const type = evt.replace("live_", "");
+		const p = path.join(app.getPath('userData'), 'sopia',  type) + ".js";
+
+		if ( fs.existsSync(p) ) {
+			const code = fs.readFileSync(p, {encoding: 'utf8'});
+			const context = this.__createContext(live_id);
+			context.spoon = msg;
+
+			vm.createContext(context);
+			const script = new vm.Script(code);
+			script.runInContext(context);
+		} else {
+			console.error(`${p} is not exists.`);
+		}
 	}
 };
 

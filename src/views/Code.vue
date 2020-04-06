@@ -317,6 +317,12 @@ export default {
 					this.notiShow = !rtn.result;
 
 					// TODO: 성공시 Snackbar 를 띄움.
+					this.$notify({
+						type: 'primary',
+						message: this.$t('code.noti.save-success'),
+						horizontalAlign: 'right',
+						verticalAlign: 'bottom',
+					});
 				} catch(err) {
 					// TODO: 실패시 Snackbar 를 띄움.
 				}
@@ -436,5 +442,8 @@ export default {
 }
 .rename-input input.form-control:focus {
 	background: rgba(67, 72, 102, 0.7);
+}
+.monaco-scrollable-element {
+	background-color: white;
 }
 </style>

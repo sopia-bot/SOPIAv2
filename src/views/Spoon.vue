@@ -19,12 +19,12 @@
 									<base-switch
 										v-if="con.type === 'toggle'"
 										@input="con.callback"
-										:class="con.itemClass"
+										:class="con.itemClass || ''"
 										v-model="con.model"></base-switch>
 									<button
 										v-else-if="con.type === 'icon-btn'"
 										class="btn base-button btn-primary px-3"
-										:class="con.itemClass"
+										:class="con.itemClass || ''"
 										@click="con.callback">
 										<i :class="con.icon"></i>
 									</button>
@@ -36,7 +36,7 @@
 											<span class="h2 font-weight-bold mb-0">{{ con.content() }}</span>
 										</div>
 										<div class="col-auto">
-											<div class="icon icon-shape rounded-circle shadow" :class="con.itemClass">
+											<div class="icon icon-shape rounded-circle shadow" :class="con.itemClass || ''">
 												<i :class="con.icon"></i>
 											</div>
 										</div>
@@ -357,6 +357,9 @@ export default {
 					this.live.info = this.$s(user.token).$live(liveId, { user_id: user.id });
 					this.live.info.connect();
 					this.live.info.onmessage = (msg) => {
+						// sopia bot emit
+						this.$s().$emit(liveId, msg.event, msg);
+
 						if ( msg.event === "live_failover" ) {
 							// 연결이 끊길 때가 있다
 							this.selectLive(liveId);
