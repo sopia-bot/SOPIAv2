@@ -61,6 +61,10 @@ export default class Live {
 				}
 			}
 
+			if ( e.data && e.data.live && e.data.live.id ) {
+				this.info = e.data.live;
+			}
+
 			if ( typeof this.onmsgcb === "function" ) {
 				this.onmsgcb(e);
 			}
@@ -101,7 +105,7 @@ export default class Live {
 
 	message(msg) {
 		this.__send({
-			message: msg.toString(),
+			message: msg.toString().replace(/\n/g, "\\n"),
 			appversion: this.appVersion,
 			useragent: "Web",
 			token: this.auth,

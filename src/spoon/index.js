@@ -49,7 +49,7 @@ const SpoonImgs = {
 const OBJDump = (obj) => {
 	switch ( typeof obj ) {
 		case "object":
-			return Object.assign({}, obj);
+			return Object.assign( Object.create( Object.getPrototypeOf(obj)), obj);
 		case "number":
 			return obj * 1;
 		case "string":
@@ -293,7 +293,7 @@ class Spoon {
 				},
 				'live': this.$live(live_id),
 				'console': console,
-				'exports': {},
+				'extra': {},
 			};
 
 			this.$emit(0, 'main', {});
@@ -313,19 +313,22 @@ class Spoon {
 			oriContext[k] = OBJDump(context[k]);
 		});
 
-		const ctKeys = Object.keys(context.exports);
+		const ctKeys = Object.keys(context.extra);
 		ctKeys.forEach((k) => {
 			if ( oriContext[k] ) {
 				delete oriContext[k];
 			}
-			oriContext[k] = OBJDump(context.exports[k]);
+			oriContext[k] = OBJDump(context.extra[k]);
 		});
+		context.extra = {};
 	}
 
 	$emit(live_id, evt, msg) {
+		if ( msg.useragent === "Server" ) return;
+
 		const type = evt.replace("live_", "");
 
-		if ( !this.sciprt[type] ) {
+		if ( !this.script[type] ) {
 			if ( !this.__loadEvtScript(type) ) {
 				return;
 			}
@@ -336,7 +339,11 @@ class Spoon {
 			context.spoon = msg.data;
 			vm.createContext(context);
 			const script = new vm.Script(this.script[type]);
-			script.runInContext(context);
+			try {
+				script.runInContext(context);
+			} catch(err) {
+				console.error(err);
+			}
 			delete context.spoon;
 			this.__patchContext(context);
 		}

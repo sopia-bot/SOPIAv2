@@ -2,7 +2,7 @@
 
 //"!개발자" 이런 문장이 왔을 때, 감지를 해내고
 //!를 삭제하여 "개발자"로 만듦
-exports.isCmd = (e) => {
+extra.isCmd = (e) => {
     let msg = e.message;
     if ( msg.indexOf("!") === 0 ) {
         msg = msg.replace("!", ""); // ! 삭제
@@ -16,25 +16,26 @@ exports.isCmd = (e) => {
 };
 
 
-exports.isAdmin = (author = "") => {
+extra.isAdmin = (author = "") => {
 	/*
     let a = sopia.storage.get('admins');
     if ( a.indexOf(author.tag) !== -1 ) {
         return true; //참/거짓 할때의 참.
     }
-	*/
-    if ( Array.isArray(live.manager_ids) && live.manager_ids.includes(author.id) ) {
+    */
+   
+    if ( Array.isArray(live.info.manager_ids) && live.info.manager_ids.includes(author.id) ) {
         return true;
     }
 
-    if ( live && live.author.id == author.id ) {
+    if ( live && live.info.author.id === author.id ) {
         return true;
     }
 
     return false;
 };
 
-exports.runCmd = (cmd, e) => {
+extra.runCmd = (cmd, e) => {
     let str = "";
     switch ( typeof cmd ) {
         case "string": {

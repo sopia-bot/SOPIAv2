@@ -52,5 +52,5 @@ if ( send && send.trim() === "" ) {
 }
 
 if ( send && send.trim().length > 0 ) {
-	sopia.send(send);
+	live.message(send);
 }
