@@ -16,6 +16,7 @@ const { remote } = electron;
 const { app } = remote;
 
 
+// TODO: 이미지 파일명이 매번 바뀌기 때문에 다운로드 후 사용해야 함.
 const SpoonImgs = {
 	"sticker_airplane": "https://www.spooncast.net/src/images/spoon/sticker_airplane_x70.9a4404ea.png",
 	"sticker_angel": "https://www.spooncast.net/src/images/spoon/sticker_angel_x70.a63292d6.png",
@@ -45,7 +46,18 @@ const SpoonImgs = {
 	"sticker_vday": "https://www.spooncast.net/src/images/spoon/sticker_vday_x70.96642b4d.png",
 };
 
-const OBJDump = (obj) => Object.assign({}, obj);
+const OBJDump = (obj) => {
+	switch ( typeof obj ) {
+		case "object":
+			return Object.assign({}, obj);
+		case "number":
+			return obj * 1;
+		case "string":
+			return obj.toString();
+		default:
+			return obj;
+	}
+};
 
 class Spoon {
 	constructor(token, api) {
@@ -57,6 +69,7 @@ class Spoon {
 		this.ll = [];
 		this.Lives = {};
 		this.var = {};
+		this.script = {};
 	}
 
 	__getToken() {
@@ -257,34 +270,75 @@ class Spoon {
 		return SpoonImgs[sticker];
 	}
 
+
+	__loadEvtScript(type) {
+		const p = path.join(app.getPath('userData'), 'sopia',  type) + ".js";
+		if ( fs.existsSync(p) ) {
+			const code = fs.readFileSync(p, {encoding: 'utf8'});
+			this.script[type] = code;
+			return true;
+		} else {
+			console.error(`${p} is not exists.`);
+			return false;
+		}
+	}
+
 	__createContext(live_id) {
 		if ( !this.vmContext ) {
 			this.vmContext = {
 				'sopia': {
 					var: this.var,
 					itv: Sopia.itv,
+					isRun: true,
 				},
 				'live': this.$live(live_id),
 				'console': console,
+				'exports': {},
 			};
+
+			this.$emit(0, 'main', {});
 		}
 		return OBJDump(this.vmContext);
 	}
 
+	__getContext() {
+		return this.vmContext;
+	}
+
+	__patchContext(context) {
+		const oriContext = this.__getContext();
+		const oriKeys = Object.keys(oriContext);
+		oriKeys.forEach((k) => {
+			delete oriContext[k];
+			oriContext[k] = OBJDump(context[k]);
+		});
+
+		const ctKeys = Object.keys(context.exports);
+		ctKeys.forEach((k) => {
+			if ( oriContext[k] ) {
+				delete oriContext[k];
+			}
+			oriContext[k] = OBJDump(context.exports[k]);
+		});
+	}
+
 	$emit(live_id, evt, msg) {
 		const type = evt.replace("live_", "");
-		const p = path.join(app.getPath('userData'), 'sopia',  type) + ".js";
 
-		if ( fs.existsSync(p) ) {
-			const code = fs.readFileSync(p, {encoding: 'utf8'});
-			const context = this.__createContext(live_id);
-			context.spoon = msg;
+		if ( !this.sciprt[type] ) {
+			if ( !this.__loadEvtScript(type) ) {
+				return;
+			}
+		}
 
+		const context = this.__createContext(live_id);
+		if ( context.sopia.isRun ) {
+			context.spoon = msg.data;
 			vm.createContext(context);
-			const script = new vm.Script(code);
+			const script = new vm.Script(this.script[type]);
 			script.runInContext(context);
-		} else {
-			console.error(`${p} is not exists.`);
+			delete context.spoon;
+			this.__patchContext(context);
 		}
 	}
 };
