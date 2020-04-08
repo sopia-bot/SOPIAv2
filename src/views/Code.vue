@@ -220,7 +220,6 @@ export default {
 				}
 			}
 
-			y -= 64;
 			this.cm.left = x;
 			this.cm.top = y;
 			this.cm.display = "block";
@@ -310,19 +309,21 @@ export default {
 		},
 		editorDidMount(editor) {
 			editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-				fs.writeFileSync(this.selectPath, editor.getValue(), {encoding: 'utf8'});
 				try {
-					const rtn = this.jsSyntax(this.selectPath);
+					const rtn = this.jsSyntax(editor.getValue());
 					this.notification = rtn;
 					this.notiShow = !rtn.result;
 
-					// TODO: 성공시 Snackbar 를 띄움.
-					this.$notify({
-						type: 'primary',
-						message: this.$t('code.noti.save-success'),
-						horizontalAlign: 'right',
-						verticalAlign: 'bottom',
-					});
+					if ( rtn.result ) {
+						fs.writeFileSync(this.selectPath, editor.getValue(), {encoding: 'utf8'});
+						// TODO: 성공시 Snackbar 를 띄움.
+						this.$notify({
+							type: 'primary',
+							message: this.$t('code.noti.save-success'),
+							horizontalAlign: 'right',
+							verticalAlign: 'bottom',
+						});
+					}
 				} catch(err) {
 					// TODO: 실패시 Snackbar 를 띄움.
 				}

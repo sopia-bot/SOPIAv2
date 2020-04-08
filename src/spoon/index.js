@@ -6,6 +6,7 @@ import path from 'path';
 // package modules
 import axios from 'axios';
 import electron from 'electron';
+import watch from 'node-watch';
 
 // author modules
 import Live from './live.js';
@@ -14,6 +15,7 @@ import Sopia from './sopia.js';
 // global variables
 const { remote } = electron;
 const { app } = remote;
+const sopiaPath = path.join(app.getPath('userData'), 'sopia');
 
 
 // TODO: 이미지 파일명이 매번 바뀌기 때문에 다운로드 후 사용해야 함.
@@ -272,7 +274,7 @@ class Spoon {
 
 
 	__loadEvtScript(type) {
-		const p = path.join(app.getPath('userData'), 'sopia',  type) + ".js";
+		const p = path.join(sopiaPath,  type) + ".js";
 		if ( fs.existsSync(p) ) {
 			const code = fs.readFileSync(p, {encoding: 'utf8'});
 			this.script[type] = code;
@@ -280,6 +282,15 @@ class Spoon {
 		} else {
 			console.error(`${p} is not exists.`);
 			return false;
+		}
+	}
+
+	__reloadEvtScript() {
+		if ( typeof this.script === "object" ) {
+			const types = Object.keys(this.script);
+			types.forEach((type) => {
+				this.__loadEvtScript(type);
+			});
 		}
 	}
 
@@ -297,6 +308,13 @@ class Spoon {
 			};
 
 			this.$emit(0, 'main', {});
+
+			watch(sopiaPath, { recursive: true }, (evt, name) => {
+				const stats = fs.statSync(name);
+				if ( !stats.isDirectory() ) {
+					this.__reloadEvtScript();
+				}
+			});
 		}
 		return OBJDump(this.vmContext);
 	}
