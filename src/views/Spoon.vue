@@ -263,6 +263,8 @@ import VueLoadingButton from 'vue-loading-button';
 import InfiniteLoading from 'vue-infinite-loading';
 import Hls from 'hls.js';
 import Comment from '@/components/Feed/Comment';
+import electron from 'electron';
+const { ipcRenderer } = electron;
 
 export default {
 	name: 'Spoon',
@@ -481,9 +483,16 @@ export default {
 					this.liveList = res;
 				});
 		}
+
+		this.popupSpoon = this.$store.getters.popupSpoon;
+		this.$store.watch(() => this.$store.getters.popupSpoon, (val) => {
+			this.popupSpoon = this.$store.getters.popupSpoon;
+			console.log(this.popupSpoon);
+		});
 	},
 	data() {
 		return {
+			popupSpoon: false,
 			isLoading: false,
 			loadMoreLiveMutex: false,
 			liveList: [],
@@ -497,6 +506,21 @@ export default {
 			search: false,
 			sText: '',
 			controls: [
+				{
+					"title": "",
+					"type": "icon-btn",
+					"class": "col col-12 col-md-3",
+					"cardClass": "bg-transparent pa-0",
+					"model": false,
+					"icon": "ni ni-ungroup",
+					"itemClass": "btn-default",
+					"key": "ungroup-window",
+					"v-if": () => !this.popupSpoon,
+					"callback": () => {
+						this.$store.commit('popupSpoon', true);
+						ipcRenderer.send('spoon-popup')
+					}
+				},
 				{
 					"title": this.$t('spoon.controls.filter'),
 					"type": "toggle",

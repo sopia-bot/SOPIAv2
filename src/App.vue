@@ -28,10 +28,11 @@
 				:clickEffect="true"
 				clickMode="repulse">
 			</vue-particles>
-			<side-bar class="custom" v-if="!isLoginPage">
+			<side-bar class="custom" v-if="!isLoginPage || global.popupWin['spoon']">
 				<template slot-scope="props" slot="links">
 					<sidebar-item
 						v-for="(item, idx) in sideItems"
+						v-if="item['v-if'] ? item['v-if']() : true"
 						:link="item.link"
 						:key="idx">
 						<template v-if="Array.isArray(item.sub)">
@@ -54,6 +55,8 @@
 	</div>
 </template>
 <script>
+import electron from 'electron';
+const { ipcRenderer } = electron;
 
 export default {
 	components: {
@@ -103,9 +106,20 @@ export default {
 				this.$assign("/login/");
 			}
 		}
+
+		ipcRenderer.on('popup-spoon', (val) => {
+			this.$store.commit('popupSpoon', val);
+		});
+
+		this.popupSpoon = this.$store.getters.popupSpoon;
+		this.$store.watch(() => this.$store.getters.popupSpoon, (val) => {
+			this.popupSpoon = this.$store.getters.popupSpoon;
+			console.log(this.popupSpoon);
+		});
 	},
 	data() {
 		return {
+			popupSpoon: false,
 			isLoginPage: false,
 			sideOpen: false,
 			sideItems: [
@@ -115,6 +129,7 @@ export default {
 						icon: "fa fa-utensil-spoon",
 						path: "/spoon/",
 					},
+					"v-if": () => !this.popupSpoon,
 				},
 				{
 					link: {

@@ -1,6 +1,6 @@
 'use strict'
 
-import { app, session, protocol, BrowserWindow } from 'electron'
+import { app, session, protocol, BrowserWindow, ipcMain } from 'electron'
 import {
 	createProtocol,
 	/* installVueDevtools */
@@ -28,7 +28,8 @@ function createWindow () {
 
 	if (process.env.WEBPACK_DEV_SERVER_URL) {
 		// Load the url of the dev server if in development mode
-		win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+		win.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "#/spoon/")
+		console.log(process.env.WEBPACK_DEV_SERVER_URL + "#/spoon/");
 		if (!process.env.IS_TEST) win.webContents.openDevTools()
 	} else {
 		createProtocol('app')
@@ -45,6 +46,48 @@ function createWindow () {
 	})
 }
 
+ipcMain.on('test-ipc', (event) => {
+	console.log("test-ipc", event.sender);
+});
+
+let isPopupedSpoon = false;
+ipcMain.on('spoon-popup', (event) => {
+	console.log(event);
+	if ( isPopupedSpoon ) return;
+
+	isPopupedSpoon = true;
+
+	let subwin = new BrowserWindow({
+		width: 1185,
+		height: 600,
+		webPreferences: {
+			nodeIntegration: true,
+			webSecurity: !isDevelopment,
+		},
+		show: false,
+	});
+
+	if (process.env.WEBPACK_DEV_SERVER_URL) {
+		// Load the url of the dev server if in development mode
+		subwin.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+	} else {
+		createProtocol('app')
+		// Load the index.html when not in development
+		subwin.loadURL('app://./index.html')
+	}
+
+	subwin.once('ready-to-show', () => {
+		event.reply('popup-spoon', { type: 'spoon', value: true });
+		subwin.show();
+	});
+
+	subwin.on('closed', () => {
+		subwin = null;
+		isPopupedSpoon = false;
+		event.reply('popup-spoon', { type: 'spoon', value: false });
+	});
+
+});
 
 global.snsLoginOpen = function(url) {
 	return new Promise((resolve, reject) => {
