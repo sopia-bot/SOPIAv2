@@ -59,6 +59,9 @@
 					class="h4 custom text-white"
 					style="height: 100%; overflow-x: auto; font-weight:300"
 					@item-click="FitemClick" />
+				<div v-else class="text-white">
+					Not Thing
+				</div>
 			</div>
 			<div class="col-8 col-md-9 pa-0">
 				<MonacoEditor
@@ -93,6 +96,23 @@ export default {
 		MonacoEditor,
 		VJstree,
 	},
+	created() {
+		const folder = this.$route.params.folder;
+		if ( folder === undefined || folder === "" ) {
+			folder = "sopia";
+		}
+		this.targetFolder = folder;
+	},
+	watch: {
+		'$route' (to, from) {
+			const folder = to.params.folder;
+			if ( folder === undefined || folder === "" ) {
+				folder = "sopia";
+			}
+			this.targetFolder = folder;
+			this.jstreeReload();
+		},
+	},
 	methods: {
 		FitemClick(node, A, evt) {
 			if ( A.folder ) {
@@ -103,6 +123,7 @@ export default {
 					const data = fs.readFileSync(file, { encoding: 'utf-8' });
 					this.code = data;
 					this.selectPath = file;
+					localStorage.setItem(`${this.targetFolder}-last-select`, file);
 				} else {
 					console.warn(file, 'not exists');
 				}
@@ -110,9 +131,9 @@ export default {
 		},
 		checkFolder () {
 			return new Promise((resolve, reject) => {
-				const dist = this.up('sopia');
+				const dist = this.up(this.targetFolder);
 				if ( !fs.existsSync(dist) ) {
-					const src = this.p('sopia');
+					const src = this.p(this.targetFolder);
 					ncp(src, dist, () => {
 						resolve();
 					});
@@ -159,7 +180,7 @@ export default {
 							if ( this.selected === fullPath ) {
 								obj["selected"] = true;
 							}
-						} else if ( ori.length === 0 && fullPath === path.join(this.up('sopia'), 'main.js') ) {
+						} else if ( ori.length === 0 && fullPath === localStorage.getItem(`${this.targetFolder}-last-select`) ) {
 							obj["selected"] = true;
 						} else if ( oriObj ) {
 							obj["selected"] = oriObj["selected"] ? true : false;
@@ -202,7 +223,11 @@ export default {
 		folderTreeAsync(oriNode, resolve) {
 			this.checkFolder()
 				.then(() => {
-					const o = this.buildFolderTree(this.up('sopia'));
+					const o = this.buildFolderTree(this.up(this.targetFolder));
+					if ( o.length === 0 ) {
+						this.jstreeRender = false;
+						return;
+					}
 					resolve(o);
 				});
 		},
@@ -303,9 +328,24 @@ export default {
 			});
 		},
 		jstreeReload() {
-			this.folderTree = this.buildFolderTree(this.up('sopia'));
-			this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
-			this.jstreeForceRenderer();
+			if ( !this.jstreeRender ) this.jstreeRender = true;
+
+			const reload = () => {
+				this.folderTree = this.buildFolderTree(this.up(this.targetFolder));
+				if ( this.folderTree.length === 0 ) {
+					this.jstreeRender = false;
+				} else {
+					this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
+					this.jstreeForceRenderer();
+				}
+			};
+
+			let itv = setInterval(() => {
+				if ( this.$refs.tree ) {
+					reload();
+					clearInterval(itv);
+				}
+			}, 100);
 		},
 		editorDidMount(editor) {
 			editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {

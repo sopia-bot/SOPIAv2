@@ -149,8 +149,17 @@ export default {
 					link: {
 						name: "Code",
 						icon: "fa fa-code",
-						path: "/code/",
-					}
+					},
+					sub: [
+						{
+							name: "SOPIA",
+							path: "/code/sopia",
+						},
+						{
+							name: "BUNDLE",
+							path: "/code/bundles",
+						},
+					]
 				},
 				{
 					link: {

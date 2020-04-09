@@ -22,3 +22,6 @@ yarn-error.log*
 
 #Electron-builder output
 /dist_electron
+
+# but keep the folder by keeping .gitkeep file
+!*/.gitkeep
