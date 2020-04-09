@@ -28,8 +28,7 @@ function createWindow () {
 
 	if (process.env.WEBPACK_DEV_SERVER_URL) {
 		// Load the url of the dev server if in development mode
-		win.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "#/spoon/")
-		console.log(process.env.WEBPACK_DEV_SERVER_URL + "#/spoon/");
+		win.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
 		if (!process.env.IS_TEST) win.webContents.openDevTools()
 	} else {
 		createProtocol('app')
@@ -52,7 +51,6 @@ ipcMain.on('test-ipc', (event) => {
 
 let isPopupedSpoon = false;
 ipcMain.on('spoon-popup', (event) => {
-	console.log(event);
 	if ( isPopupedSpoon ) return;
 
 	isPopupedSpoon = true;
@@ -69,15 +67,14 @@ ipcMain.on('spoon-popup', (event) => {
 
 	if (process.env.WEBPACK_DEV_SERVER_URL) {
 		// Load the url of the dev server if in development mode
-		subwin.loadURL(process.env.WEBPACK_DEV_SERVER_URL)
+		subwin.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "popup.html")
 	} else {
 		createProtocol('app')
 		// Load the index.html when not in development
-		subwin.loadURL('app://./index.html')
+		subwin.loadURL('app://./popup.html')
 	}
 
 	subwin.once('ready-to-show', () => {
-		event.reply('popup-spoon', { type: 'spoon', value: true });
 		subwin.show();
 	});
 

@@ -6,7 +6,7 @@
 			class="nav-toggle-btn d-xl-none"
 			@click="toggle"
 			:style="{ left: sideOpen ? '250px' : '0px' }"
-			v-if="!isLoginPage">
+			v-if="!isLoginPage && !popupWindow">
 			<i class="ni ni-bold-left" v-if="sideOpen"></i>
 			<i class="ni ni-bold-right" v-else></i>
 		</base-button>
@@ -28,7 +28,7 @@
 				:clickEffect="true"
 				clickMode="repulse">
 			</vue-particles>
-			<side-bar class="custom" v-if="!isLoginPage || global.popupWin['spoon']">
+			<side-bar class="custom" v-if="!isLoginPage && !popupWindow">
 				<template slot-scope="props" slot="links">
 					<sidebar-item
 						v-for="(item, idx) in sideItems"
@@ -107,18 +107,25 @@ export default {
 			}
 		}
 
-		ipcRenderer.on('popup-spoon', (val) => {
-			this.$store.commit('popupSpoon', val);
+		if ( sessionStorage.getItem("popup") === "true" ) {
+			this.popupWindow = true;
+		}
+
+		ipcRenderer.on('popup-spoon', (evt, val) => {
+			if ( val.value === false ) {
+				this.$store.commit('popupSpoon', false);
+				this.$assign("/spoon/");
+			}
 		});
 
 		this.popupSpoon = this.$store.getters.popupSpoon;
 		this.$store.watch(() => this.$store.getters.popupSpoon, (val) => {
 			this.popupSpoon = this.$store.getters.popupSpoon;
-			console.log(this.popupSpoon);
 		});
 	},
 	data() {
 		return {
+			popupWindow: false,
 			popupSpoon: false,
 			isLoginPage: false,
 			sideOpen: false,

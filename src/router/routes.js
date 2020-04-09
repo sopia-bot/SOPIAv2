@@ -4,7 +4,7 @@ const routes = [
 		name: 'Home',
 	},
 	{
-		path: '/spoon/',
+		path: '/spoon/:popup(.*)',
 		name: 'Spoon',
 		component: () => import('@/views/Spoon.vue')
 	},

@@ -484,14 +484,18 @@ export default {
 				});
 		}
 
+		if ( sessionStorage.getItem('popup') === "true" ) {
+			this.popupWindow = true;
+		}
+
 		this.popupSpoon = this.$store.getters.popupSpoon;
 		this.$store.watch(() => this.$store.getters.popupSpoon, (val) => {
 			this.popupSpoon = this.$store.getters.popupSpoon;
-			console.log(this.popupSpoon);
 		});
 	},
 	data() {
 		return {
+			popupWindow: false,
 			popupSpoon: false,
 			isLoading: false,
 			loadMoreLiveMutex: false,
@@ -515,10 +519,11 @@ export default {
 					"icon": "ni ni-ungroup",
 					"itemClass": "btn-default",
 					"key": "ungroup-window",
-					"v-if": () => !this.popupSpoon,
+					"v-if": () => !this.popupSpoon && !this.popupWindow,
 					"callback": () => {
 						this.$store.commit('popupSpoon', true);
-						ipcRenderer.send('spoon-popup')
+						this.$assign("/dashboard/");
+						ipcRenderer.send('spoon-popup');
 					}
 				},
 				{
