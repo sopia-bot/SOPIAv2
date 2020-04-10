@@ -134,9 +134,19 @@ export default {
 				const dist = this.up(this.targetFolder);
 				if ( !fs.existsSync(dist) ) {
 					const src = this.p(this.targetFolder);
-					ncp(src, dist, () => {
-						resolve();
-					});
+					if ( fs.existsSync(src) ) {
+						ncp(src, dist, () => {
+							resolve();
+						});
+					} else {
+						fs.mkdir(dist, (err) => {
+							if ( err ) {
+								reject(err);
+								return;
+							}
+							resolve();
+						});
+					}
 				} else {
 					resolve();
 				}
@@ -147,77 +157,83 @@ export default {
 			const readdir = (path_, _d = "", ori_) => {
 				_d = _d || "";
 				const target = path.join(_d, path_);
-				const fll = fs.readdirSync(target);
-				const arr = [];
 
-				if ( Array.isArray(fll) ) {
-					const fl = fll.sort((a, b) => {
-						const statsA = fs.statSync(path.join(target,a));
-						const statsB = fs.statSync(path.join(target,b));
-						if ( statsA.isDirectory() ) {
-							return -1;
-						} else if ( statsB.isDirectory() ) {
-							return 1;
-						}
-						return a > b ? 1 : -1;
-					});
+				if ( fs.existsSync(target) ) {
+					const fll = fs.readdirSync(target);
+					const arr = [];
 
-					fl.forEach(f => {
-						const fullPath = path.join(target,f);
-						const stats = fs.statSync(fullPath);
-						const obj = {};
-						const oriObjIdx = Array.isArray(ori_) ? ori_.findIndex((oo) => {
-							if ( oo["value"] === fullPath ) return true;
-							if ( oo["value"] === this.cm.rename.value ) return true;
-						}) : -1;
-						const oriObj = oriObjIdx >= 0 ? ori_[oriObjIdx] : null;
+					if ( Array.isArray(fll) ) {
+						const fl = fll.sort((a, b) => {
+							const statsA = fs.statSync(path.join(target,a));
+							const statsB = fs.statSync(path.join(target,b));
+							if ( statsA.isDirectory() ) {
+								return -1;
+							} else if ( statsB.isDirectory() ) {
+								return 1;
+							}
+							return a > b ? 1 : -1;
+						});
 
-						obj["text"] = f;
-						obj["value"] = fullPath;
-						obj["isLeaf"] = false;
+						fl.forEach(f => {
+							const fullPath = path.join(target,f);
+							const stats = fs.statSync(fullPath);
+							const obj = {};
+							const oriObjIdx = Array.isArray(ori_) ? ori_.findIndex((oo) => {
+								if ( oo["value"] === fullPath ) return true;
+								if ( oo["value"] === this.cm.rename.value ) return true;
+							}) : -1;
+							const oriObj = oriObjIdx >= 0 ? ori_[oriObjIdx] : null;
 
-						if ( this.selected ) {
-							if ( this.selected === fullPath ) {
+							obj["text"] = f;
+							obj["value"] = fullPath;
+							obj["isLeaf"] = false;
+
+							if ( this.selected ) {
+								if ( this.selected === fullPath ) {
+									obj["selected"] = true;
+								}
+							} else if ( ori.length === 0 && fullPath === localStorage.getItem(`${this.targetFolder}-last-select`) ) {
 								obj["selected"] = true;
+							} else if ( oriObj ) {
+								obj["selected"] = oriObj["selected"] ? true : false;
 							}
-						} else if ( ori.length === 0 && fullPath === localStorage.getItem(`${this.targetFolder}-last-select`) ) {
-							obj["selected"] = true;
-						} else if ( oriObj ) {
-							obj["selected"] = oriObj["selected"] ? true : false;
-						}
 
-						if ( stats.isDirectory() ) {
-							obj["icon"] = "fa fa-folder";
-							obj["children"] = readdir(fullPath, "", oriObj ? oriObj.children : null);
-							obj["folder"] = true;
+							if ( stats.isDirectory() ) {
+								obj["icon"] = "fa fa-folder";
+								obj["children"] = readdir(fullPath, "", oriObj ? oriObj.children : null);
+								obj["folder"] = true;
 
-							if ( oriObj ) {
-								obj["opened"] = oriObj["opened"] ? true : false;
-							} else {
-								obj["opened"] = false;
-							}
-						} else {
-							obj["icon"] = iconFinder(path.extname(f));
-							obj["children"] = [];
-
-							if ( obj["selected"] === true ) {
-								const file = obj["value"];
-								if ( fs.existsSync(file) ) {
-									const data = fs.readFileSync(file, { encoding: 'utf-8' });
-									this.code = data;
-									this.selectPath = file;
+								if ( oriObj ) {
+									obj["opened"] = oriObj["opened"] ? true : false;
 								} else {
-									console.warn(file, 'not exists');
+									obj["opened"] = false;
+								}
+							} else {
+								obj["icon"] = iconFinder(path.extname(f));
+								obj["children"] = [];
+
+								if ( obj["selected"] === true ) {
+									const file = obj["value"];
+									if ( fs.existsSync(file) ) {
+										const data = fs.readFileSync(file, { encoding: 'utf-8' });
+										this.code = data;
+										this.selectPath = file;
+									} else {
+										console.warn(file, 'not exists');
+									}
 								}
 							}
-						}
 
-						arr.push(obj);
-					});
+							arr.push(obj);
+						});
+					}
+					return arr;
+				} else {
+					this.checkFolder();
+					return [];
 				}
-
-				return arr;
 			};
+
 			return readdir(src, "", ori);
 		},
 		folderTreeAsync(oriNode, resolve) {
