@@ -47,20 +47,42 @@
 		<!-- S:Notification -->
 		<div class="row ma-0" style="height: 100vh">
 			<div class="col-4 col-md-3" style="padding-top:20px;">
-				<v-jstree
-					:data="folderTree"
-					:async="folderTreeAsync"
-					whole-row
-					show-checkbox
-					ref="tree"
-					v-if="jstreeRender"
-					:item-events="itemEvents"
-					size="large"
-					class="h4 custom text-white"
-					style="height: 100%; overflow-x: auto; font-weight:300"
-					@item-click="FitemClick" />
-				<div v-else class="text-white">
-					Not Thing
+				<div class="row ma-0 mb-3">
+					<div class="col col-12 text-right">
+						<el-tooltip
+							v-for="(item, idx) in toolbarItems"
+							:key="item.tooltip+'-'+idx"
+							:content="item.tooltip"
+							placement="bottom">
+							<base-button
+								@click="item.click"
+								type="secondary"
+								:class="item.classes"
+								class="ml-3"
+								size="sm">
+								<i :class="item.icon"></i>
+							</base-button>
+						</el-tooltip>
+					</div>
+				</div>
+				<div class="row ma-0">
+					<div class="col col-12">
+						<v-jstree
+							:data="folderTree"
+							:async="folderTreeAsync"
+							whole-row
+							show-checkbox
+							ref="tree"
+							v-if="jstreeRender"
+							:item-events="itemEvents"
+							size="large"
+							class="h4 custom text-white"
+							style="height: 100%; overflow-x: auto; font-weight:300"
+							@item-click="FitemClick" />
+							<div v-else class="text-white">
+								Not Thing
+							</div>
+					</div>
 				</div>
 			</div>
 			<div class="col-8 col-md-9 pa-0">
@@ -82,6 +104,7 @@ import fs from 'fs';
 import path from 'path';
 import { ncp } from 'ncp';
 import rimraf from 'rimraf';
+import { shell } from 'electron';
 
 const iconFinder = (ext) => {
 	switch (ext) {
@@ -363,26 +386,39 @@ export default {
 				}
 			}, 100);
 		},
+		save(editor) {
+			if ( !this.selectPath ) {
+				this.$notify({
+					type: 'danger',
+					message: this.$t('code.noti.not-select-file'),
+					horizontalAlign: 'right',
+					verticalAlign: 'bottom',
+				});
+				return;
+			}
+			try {
+				const rtn = this.jsSyntax(editor.getValue());
+				this.notification = rtn;
+				this.notiShow = !rtn.result;
+
+				if ( rtn.result ) {
+					fs.writeFileSync(this.selectPath, editor.getValue(), {encoding: 'utf8'});
+					// TODO: 성공시 Snackbar 를 띄움.
+					this.$notify({
+						type: 'primary',
+						message: this.$t('code.noti.save-success'),
+						horizontalAlign: 'right',
+						verticalAlign: 'bottom',
+					});
+				}
+			} catch(err) {
+				// TODO: 실패시 Snackbar 를 띄움.
+				console.error(err);
+			}
+		},
 		editorDidMount(editor) {
 			editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S, () => {
-				try {
-					const rtn = this.jsSyntax(editor.getValue());
-					this.notification = rtn;
-					this.notiShow = !rtn.result;
-
-					if ( rtn.result ) {
-						fs.writeFileSync(this.selectPath, editor.getValue(), {encoding: 'utf8'});
-						// TODO: 성공시 Snackbar 를 띄움.
-						this.$notify({
-							type: 'primary',
-							message: this.$t('code.noti.save-success'),
-							horizontalAlign: 'right',
-							verticalAlign: 'bottom',
-						});
-					}
-				} catch(err) {
-					// TODO: 실패시 Snackbar 를 띄움.
-				}
+				this.save(editor);
 			});
 		},
 	},
@@ -421,6 +457,25 @@ export default {
 			selectPath: null,
 			notification: { result: true },
 			notiShow: false,
+			toolbarItems: [
+				{
+					icon: "far fa-save",
+					tooltip: this.$t('code.tooltip.save'),
+					classes: "",
+					click: () => {
+						const refEditor = this.$refs['code-editor'];
+						this.save(refEditor.getEditor());
+					}
+				},
+				{
+					icon: "far fa-folder-open",
+					tooltip: this.$t('code.tooltip.open-folder'),
+					classes: "",
+					click: () => {
+						shell.openItem(this.up(this.targetFolder));
+					}
+				},
+			],
 		};
 	},
 }
@@ -502,5 +557,14 @@ export default {
 }
 .monaco-scrollable-element {
 	background-color: white;
+}
+.el-tooltip__popper {
+	margin-top: 10px;
+	color: white;
+	background: rgba(38, 41, 59, 0.7);
+	padding: 0.3rem 0.5rem;
+	border: 2px ridge rgba(67, 72, 102, 0.7);
+	font-size: 10pt;
+	font-weight: bold;
 }
 </style>

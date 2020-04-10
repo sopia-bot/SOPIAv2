@@ -9,7 +9,14 @@
 		"noti": {
 			"syntax-error": "문법 에러",
 			"check-line": "다음 라인을 확인하십시오.",
-			"save-success": "파일을 성공적으로 저장했습니다."
+			"save-success": "파일을 성공적으로 저장했습니다.",
+			"not-select-file": "수정중인 파일이 없습니다.",
+			"reload": "파일을 적용합니다. 어차피 수정되면 자동으로 적용됩니다."
+		},
+		"tooltip": {
+			"save": "저장",
+			"reload": "코드 적용",
+			"open-folder": "코드 폴더 열기"
 		}
 	},
 	"login": {
