@@ -24,4 +24,4 @@ yarn-error.log*
 /dist_electron
 
 # but keep the folder by keeping .gitkeep file
-!*/.gitkeep
+!bundles/.gitkeep
