@@ -41,6 +41,7 @@ class Spoon {
 		this.Lives = {};
 		this.var = {};
 		this.script = {};
+		this.$sopia = Sopia;
 	}
 
 	__getToken() {

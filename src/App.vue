@@ -57,6 +57,8 @@
 <script>
 import electron from 'electron';
 const { ipcRenderer } = electron;
+import axios from 'axios';
+
 
 export default {
 	components: {
@@ -99,6 +101,7 @@ export default {
 		}
 	},
 	mounted() {
+		window.axios = axios;
 		if ( this.$route.path === "/" ) {
 			if ( this.checkUserValid() ) {
 				this.$assign("/spoon/");
