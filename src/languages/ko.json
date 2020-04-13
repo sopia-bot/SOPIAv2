@@ -1,4 +1,14 @@
 {
+	"loading": {
+		"status": {
+			"complete": "완료",
+			"starting": "프로그램 진입",
+			"check-update": "프로그램 업데이트 확인",
+			"check-files": "필요 구성 파일 확인",
+			"progress-update": "업데이트 진행중",
+			"progress-down-file": "파일 다운로드"
+		}
+	},
 	"code": {
 		"context": {
 			"newfile": "새 파일 만들기",

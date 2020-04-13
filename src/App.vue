@@ -6,7 +6,7 @@
 			class="nav-toggle-btn d-xl-none"
 			@click="toggle"
 			:style="{ left: sideOpen ? '250px' : '0px' }"
-			v-if="!isLoginPage && !popupWindow">
+			v-if="!hideSidebar && !popupWindow">
 			<i class="ni ni-bold-left" v-if="sideOpen"></i>
 			<i class="ni ni-bold-right" v-else></i>
 		</base-button>
@@ -28,7 +28,7 @@
 				:clickEffect="true"
 				clickMode="repulse">
 			</vue-particles>
-			<side-bar class="custom" v-if="!isLoginPage && !popupWindow">
+			<side-bar class="custom" v-if="!hideSidebar && !popupWindow">
 				<template slot-scope="props" slot="links">
 					<sidebar-item
 						v-for="(item, idx) in sideItems"
@@ -57,7 +57,6 @@
 <script>
 import electron from 'electron';
 const { ipcRenderer } = electron;
-import axios from 'axios';
 
 
 export default {
@@ -85,7 +84,7 @@ export default {
 		'$route' (to, from) {
 			if ( to.path === "/" ) {
 				if ( this.checkUserValid() ) {
-					this.$assign('/spoon/');
+					this.$assign('/loading/');
 				} else {
 					this.$assign('/login/');
 				}
@@ -93,6 +92,9 @@ export default {
 
 			if ( to.name === "Login" ) {
 				this.isLoginPage = true;
+				this.hideSidebar = true;
+			} else if ( to.name === "Loading" ) {
+				this.hideSidebar = true;
 			} else {
 				this.isLoginPage = false;
 			}
@@ -101,10 +103,9 @@ export default {
 		}
 	},
 	mounted() {
-		window.axios = axios;
 		if ( this.$route.path === "/" ) {
 			if ( this.checkUserValid() ) {
-				this.$assign("/spoon/");
+				this.$assign("/loading/");
 			} else {
 				this.$assign("/login/");
 			}
@@ -131,6 +132,7 @@ export default {
 			popupWindow: false,
 			popupSpoon: false,
 			isLoginPage: false,
+			hideSidebar: false,
 			sideOpen: false,
 			sideItems: [
 				{

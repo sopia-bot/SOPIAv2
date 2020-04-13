@@ -1,16 +1,23 @@
-import Vue from 'vue';
-import { remote } from 'electron';
-const { app } = remote;
-import path from 'path';
-import fs from 'fs';
-import vm from 'vm';
-import axios from 'axios';
+// native import
 import os  from 'os';
+import vm from 'vm';
+import fs from 'fs';
+import path from 'path';
 
+// package import
+import Vue from 'vue';
+import electron from 'electron';
+import axios from 'axios';
+
+// plugin import
 import s from '@/spoon/';
-const Spoon = s.Spoon;
-
 import c from '@/plugins/config.js';
+import version from '@/version.json';
+
+// global variable
+const { remote } = electron;
+const { app } = remote;
+const Spoon = s.Spoon;
 const Config = c.Config;
 
 const jsOrPath = (code) => {
@@ -130,6 +137,32 @@ Vue.mixin({
 			if ( typeof url === "string" && router ) {
 				if ( router.history.current.path !== url ) {
 					router.push({ path: url });
+				}
+			}
+		},
+		$ver() {
+			return version;
+		},
+		$db() {
+			const fbDbUrl = "https://sopia-bot.firebaseio.com";
+			return {
+				get: (href) => {
+					const ext = path.extname(href);
+					if ( href[href.length-1] === "/" ) {
+						href = href.substr(0, href.length-1);
+					}
+					let reqUrl = `${fbDbUrl}${href[0] === '/'? '' : '/'}${href}`;
+					if ( ext === "" ) {
+						reqUrl += ".json";
+					}
+
+					return new Promise((resolve, reject) => {
+						axios.get(reqUrl)
+							.then(res => {
+								resolve(res.data);
+							})
+							.catch(reject);
+					});
 				}
 			}
 		},

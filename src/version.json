@@ -1,0 +1,13 @@
+{
+	"app": 2,
+	"major": 0,
+	"build": 0,
+	"build-info": {
+		"time": "2020-04-13T05:33:46.583Z",
+		"os": {
+			"platform": "linux",
+			"release": "3.16.0-38-generic",
+			"arch": "ia32"
+		}
+	}
+}

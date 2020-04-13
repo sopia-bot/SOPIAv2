@@ -4,6 +4,11 @@ const routes = [
 		name: 'Home',
 	},
 	{
+		path: '/loading/',
+		name: 'Loading',
+		component: () => import('@/views/Loading.vue')
+	},
+	{
 		path: '/spoon/:popup(.*)',
 		name: 'Spoon',
 		component: () => import('@/views/Spoon.vue')
