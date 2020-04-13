@@ -293,18 +293,29 @@ itv.add('spoorchat', () => {
 	}
 }, 1000);
 
-const pushTtsList = (msg) => {
-    if ( msg ) {
-        tts.stack.push({
-            message: msg,
-        });
-    }
+const pushTtsList = (data) => {
+	// spoorchat
+	// console.log("pushTtsList come!!!!!!!!!!!!!!!!!");
+	let idx = tts.user.findIndex(item => item.id === data.author.id);
+	if ( idx >= 0 ) {
+		tts.user.splice(idx, 1);
+		// console.log("idx is", idx, "message is", data.message);
+		tts.stack.push({
+			message: data.message,
+		});
+	}
 };
 
+const pushUser = (author) => {
+	// console.log("pushUser", author);
+	tts.user.push({ id: author.id, thick: 0});
+}
 
 
 export default {
     itv,
-    pushTtsList,
-    voices,
+	pushTtsList,
+	pushUser,
+	voices,
+	tts,
 };

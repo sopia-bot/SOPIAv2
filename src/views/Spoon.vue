@@ -361,6 +361,23 @@ export default {
 					this.live.info.onmessage = (msg) => {
 						// sopia bot emit
 						this.$s().$emit(liveId, msg.event, msg);
+						
+						// for spoor chat
+						if ( msg.event === "live_present" ) {
+							const spoor = this.$cfg('app').get('spoor');
+							const data = msg.data;
+							//console.log(spoor);
+							this.$cfg('app').set('spoor.minspoon', 1);
+							//console.log("spoor enable", spoor.enable, "data", data, "spoor minspoon", spoor.minspoon )
+							if ( spoor.enable && (data.combo * data.amount) >= spoor.minspoon )  {
+								this.$s().$sopia.pushUser(data.author);
+							}
+						} else if ( msg.event === "live_message" ) {
+							// spoorchat
+							if ( this.$s().$sopia.tts.user.length > 0 ) {
+								this.$s().$sopia.pushTtsList(msg.data);
+							}
+						}
 
 						if ( msg.event === "live_failover" ) {
 							// 연결이 끊길 때가 있다

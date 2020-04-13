@@ -315,7 +315,6 @@ class Spoon {
 		if ( msg.useragent === "Server" ) return;
 
 		const type = evt.replace("live_", "");
-
 		if ( !this.script[type] ) {
 			if ( !this.__loadEvtScript(type) ) {
 				return;

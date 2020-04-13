@@ -40,17 +40,18 @@ const djTag = spoon.live.author.tag;
 const authorTag = spoon.author.tag;
 const sticker = spoon.sticker;
 let send = "";
+
 if ( reaction[djTag] ) {
 	if ( reaction[djTag][sticker] ) {
 		send = runCmd(reaction[djTag][sticker], spoon);
 	}
 }
 
-if ( send && send.trim() === "" ) {
+if ( typeof send === "string" && send.trim() === "" ) {
 	let s = reaction["default"][sticker] ? sticker : "default";
 	send = runCmd(reaction["default"][s], spoon);
 }
 
-if ( send && send.trim().length > 0 ) {
+if ( typeof send === "string" && send.trim().length > 0 ) {
 	live.message(send);
 }
