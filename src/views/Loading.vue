@@ -146,12 +146,14 @@ export default {
 		},
 	},
 	async mounted() {
+		/* for debug
 		await sleep(3000);
 		await this.checkUpdate();
 		this.step++;
 		await this.checkFiles();
 		this.step++;
 		await sleep(500);
+		*/
 		this.$assign('/spoon/');
 	},
 	data() {

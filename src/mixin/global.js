@@ -114,14 +114,18 @@ Vue.mixin({
 			}
 		},
 		$s(token, api) {
-			if ( this._data._spoon ) {
+			if ( this._data && this._data._spoon ) {
 				if ( typeof token === "string" ) {
 					this._data._spoon.token = token;
 				}
 				return this._data._spoon;
 			}
 
-			return this._data._spoon = new Spoon(token, api);
+			if ( this._data ) {
+				return this._data._spoon = new Spoon(token, api);
+			} else {
+				return new Spoon(token, api);
+			}
 		},
 		$remote() {
 			return remote;

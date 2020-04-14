@@ -85,7 +85,6 @@ export default {
 			if ( to.path === "/" ) {
 				if ( this.checkUserValid() ) {
 					this.$assign('/loading/');
-					this.$assign("/spoon/");
 				} else {
 					this.$assign('/login/');
 				}
@@ -98,6 +97,7 @@ export default {
 				this.hideSidebar = true;
 			} else {
 				this.isLoginPage = false;
+				this.hideSidebar = false;
 			}
 
 			this.sideOpen = false;

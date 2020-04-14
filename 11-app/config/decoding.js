@@ -16,7 +16,11 @@ const decoding = (str, hash) => {
 }
 
 argv.forEach((arg) => {
-	const target = path.join(__dirname, arg);
+	let target = arg;
+	if ( !fs.existsSync(target) ) {
+		target = path.join(__dirname, arg);
+	}
+
 	if ( fs.existsSync(target) ) {
 		console.log("=============================", arg,"=============================");
 		const hash = shaHash(path.basename(arg));

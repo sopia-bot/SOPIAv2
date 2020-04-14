@@ -22,6 +22,7 @@ import VueParticles from 'vue-particles';
 import Transitions from 'vue2-transitions'
 import './mixin/global.js';
 import '@/assets/css/style.css';
+import 'element-ui/lib/theme-chalk/index.css';
 import i18n from './plugins/i18n'
 import router from "./router/router";
 

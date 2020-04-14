@@ -1,5 +1,6 @@
 import fs from 'fs';
 import crypto from 'crypto';
+import path from 'path';
 
 const shaHash = str => crypto.createHash('sha256').update(str).digest('hex');
 
@@ -30,7 +31,7 @@ const getObject = (obj, key, midx=0, rtn = obj) => {
 class Config {
 	constructor(file) {
 		this.cfgFile = file;
-		this.hash = shaHash(file);
+		this.hash = shaHash(path.basename(file));
 		this.__loadConfigFile();
 	}
 

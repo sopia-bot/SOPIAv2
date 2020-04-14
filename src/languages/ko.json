@@ -66,5 +66,25 @@
 			"sum": "누적 청취자"
 		}
 	},
-	"manager": "매니저"
+	"spoor": {
+		"setting": {
+			"title": "Spoor Chat 설정",
+			"enable": "Spoor Chat 사용",
+			"voice-type": "목소리 형태",
+			"minspoon": "최소 요구 스푼",
+			"effect-volume": "효과음 볼륨",
+			"tts-volume": "TTS 볼륨",
+			"toutspoor": "Spoor 대기 시간 (초)",
+			"voices": {
+				"random": "랜덤",
+				"minji": "민지",
+				"minjung": "민정",
+				"minsu": "민수",
+				"minsang": "민상"
+			}
+		},
+		"save": "저장되었습니다."
+	},
+	"manager": "매니저",
+	"save": "저장"
 }
