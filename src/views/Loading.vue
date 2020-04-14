@@ -4,20 +4,29 @@
 			<div class="col-lg-7 col-md-10">
 				<!-- S:Card -->
 				<div class="card bg-secondary border-0 mb-0">
-					<div class="card-body px-lg-4 py-4">
-						<div class="row ma-0">
-							<div class="col col-12">
-								{{ $t('loading.status.'+status) }}
+                    <div class="card-header border-bottom-0 pb-0 px-lg-5 bg-transparent">
+                        <div class="text-muted mt-2">
+                            {{ $t('loading.status.'+status) }}
+                        </div>
+                    </div>
+					<div class="card-body px-lg-4">
+						<div class="row ma-0 mb-2">
+							<div class="col col-12 px-4">
+								<base-progress
+									animated
+									type="success"
+									:height="5"
+									:value="getProgress(step, stepLength)">
+								</base-progress>
 							</div>
 						</div>
 						<div v-if="downProgShow" class="row ma-0">
-							<div class="col col-12">
+							<div class="col col-12 px-4">
 								<base-progress
 									:animated="downAnimation"
 									type="success"
 									:height="3"
-									:value="downProg"
-									label="Task completed"></base-progress>
+									:value="downProg"></base-progress>
 							</div>
 						</div>
 					</div>
@@ -53,6 +62,9 @@ const versionCompare = (app, server) => {
 export default {
     name: 'Loading',
 	methods: {
+		getProgress(progress, finish) {
+			return Math.round(progress / finish * 100);
+		},
 		async checkUpdate() {
 			this.status = "check-update";
 
@@ -76,6 +88,7 @@ export default {
 			const cfs = async (obj, p) => {
 				const fl = Object.keys(obj);
 
+				this.stepLength += fl.length;
 				for (let i=0;i<fl.length;i++) {
 					const f = fl[i];
 					const o = obj[f];
@@ -84,9 +97,11 @@ export default {
 						// file
 						const file = `${target}.${o.ext}`;
 						if ( fs.existsSync(file) ) {
+							this.step++;
 							continue;
 						}
 
+						this.status = "progress-down-file";
 						this.downProg = 0;
 						this.downProgShow = true;
 						this.downAnimation = true;
@@ -103,8 +118,7 @@ export default {
 							if ( !done ) {
 								downloaded += chunk.value.length;
 
-								this.downProg = Math.round(downloaded / contentLength * 100);
-								console.log(this.downProg);
+								this.downProg = this.getProgress(downloaded, contentLength);
 
 								fs.appendFileSync(file, new Buffer(chunk.value));
 							}
@@ -112,13 +126,16 @@ export default {
 
 						this.downAnimation = false;
 						await sleep(300);
+						this.status = "progress-down-complete";
 						this.downProgShow = false;
+						this.step++;
 						await sleep(50);
 					} else {
 						// directory
 						if ( !fs.existsSync(target) ) {
 							fs.mkdirSync(target);
 						}
+						this.step++;
 						await cfs(obj[f], target);
 					}
 				}
@@ -129,8 +146,13 @@ export default {
 		},
 	},
 	async mounted() {
+		await sleep(3000);
 		await this.checkUpdate();
+		this.step++;
 		await this.checkFiles();
+		this.step++;
+		await sleep(500);
+		this.$assign('/spoon/');
 	},
 	data() {
 		return {
@@ -138,6 +160,8 @@ export default {
 			downProg: 0,
 			downProgShow: false,
 			downAnimation: false,
+			step: 0,
+			stepLength: 2,
 		};
 	},
 }
