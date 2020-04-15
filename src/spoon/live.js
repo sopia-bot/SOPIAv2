@@ -33,6 +33,10 @@ export default class Live {
 		this.__send(msg);
 	}
 
+	get liveUrl() {
+		return `https://spooncast.net/${this.country}/live/${this.live_id}`;
+	}
+
 	set onmessage(callback = () => {}) {
 		this.onmsgcb = callback;
 	}

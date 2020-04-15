@@ -45,6 +45,62 @@
 							</div>
 							
 						</div>
+						<!-- S:Live Info -->
+						<div
+							v-if="tab === 'live-chat'"
+							class="col col-12 mb-3">
+							<card>
+								<div class="card-header bg-transparent py-1">
+									<h3>{{ $t('spoon.live.info.name') }}</h3>
+								</div>
+								<div class="card-body bg-white rounded-lg mb-0">
+									<div class="row ma-0 mb-3 justify-content-center">
+										<div class="col text-left">
+											<p class="ma-0">{{ $t('spoon.live.info.title') }}</p>
+										</div>
+										<div class="col col-12 col-md-9 text-right">
+											<p class="ma-0">{{ live.data.title }}</p>
+										</div>
+									</div>
+									<div class="row ma-0 mb-3 justify-content-center">
+										<div class="col text-left">
+											<p class="ma-0">{{ $t('spoon.live.info.dj') }}</p>
+										</div>
+										<div class="col col-12 col-md-6 text-right">
+											<p class="ma-0">{{ live.data.author.nickname }}</p>
+										</div>
+									</div>
+									<div class="row ma-0 mb-3 justify-content-center">
+										<div class="col text-left">
+											<p class="ma-0">{{ $t('spoon.live.info.dj-tag') }}</p>
+										</div>
+										<div class="col col-12 col-md-6 text-right">
+											<p class="ma-0">{{ live.data.author.tag }}</p>
+										</div>
+									</div>
+									<div class="row ma-0 justify-content-center">
+										<div class="col text-left">
+											<p class="ma-0">{{ $t('spoon.live.info.url') }}</p>
+										</div>
+										<div class="col col-12 col-md-9 text-right">
+											<a :href="live.info.liveUrl" target="_blank" class="ma-0">
+												{{ live.info.liveUrl }}
+											</a>
+										</div>
+									</div>
+								</div>
+								<div class="card-footer pb-1">
+									<base-progress
+										animated
+										type="info"
+										class="ma-0 custom"
+										:height="5"
+										:value="getProgressLive()">
+									</base-progress>
+								</div>
+							</card>
+						</div>
+						<!-- E:Live Info -->
 					</div>
 				</div>
 				<!-- S:Right Panel -->
@@ -356,9 +412,21 @@ export default {
 					*/
 
 					// live join
-					this.live.info = this.$s(user.token).$live(liveId, { user_id: user.id });
+					this.live.info = this.$s(user.token).$live(liveId, { user_id: user.id, country: "kr" });
 					this.live.info.connect();
 					this.live.info.onmessage = (msg) => {
+						// if live closed
+						if ( msg.event === "live_update" ) {
+							if ( msg.data && msg.data.live && msg.data.live.close_status === 1 ) {
+								// live closed
+								this.live.info.disconnect();
+								this.live.info = null;
+								this.live.data = null;
+								this.live.msgs = [];
+								this.live.chat = "";
+							}
+						}
+
 						// sopia bot emit
 						if ( msg.event === "live_message" ) {
 							this.$s().$emit(liveId, msg.event, msg);
@@ -487,6 +555,12 @@ export default {
 				}
 			}
 		},
+		getProgressLive() {
+			const created = new Date(this.live.data.created).getTime();
+			const now = new Date().getTime();
+			const max = 7200;
+			return Math.round(((now-created)/1000) / max * 100);
+		},
 	},
 	mounted() {
 		const app = this.$cfg('app');
@@ -522,6 +596,7 @@ export default {
 			tab: 'live-list',
 			live: {
 				msgs: [],
+				//info: null,
 				info: true,
 				chat: "",
 				data: null,
@@ -530,6 +605,7 @@ export default {
 			sText: '',
 			controls: [
 				{
+					// window popup button
 					"title": "",
 					"type": "icon-btn",
 					"class": "col col-12 col-md-3",
@@ -546,6 +622,7 @@ export default {
 					}
 				},
 				{
+					// use filter live list
 					"title": this.$t('spoon.controls.filter'),
 					"type": "toggle",
 					"class": "col col-12 col-md-6",
@@ -569,6 +646,7 @@ export default {
 					},
 				},
 				{
+					// listener count live info
 					"title": "",
 					"sub-title": this.$t('spoon.controls.listener'),
 					"type": "stats",
@@ -579,6 +657,7 @@ export default {
 					"itemClass": "bg-default text-white",
 				},
 				{
+					// like count live info
 					"title": "",
 					"sub-title": this.$t('spoon.controls.like'),
 					"type": "stats",
@@ -589,6 +668,7 @@ export default {
 					"itemClass": "bg-red text-white",
 				},
 				{
+					// total listener live info
 					"title": "",
 					"sub-title": this.$t('spoon.controls.sum'),
 					"type": "stats",
@@ -638,5 +718,8 @@ p {
 	color: #fff;
 	border-color: rgba(201, 52, 82, 0.5);
     background-color: rgba(201, 52, 82, 0.5);
+}
+.custom .progress {
+	margin-bottom: 0;
 }
 </style>
