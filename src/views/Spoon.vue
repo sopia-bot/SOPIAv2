@@ -360,7 +360,9 @@ export default {
 					this.live.info.connect();
 					this.live.info.onmessage = (msg) => {
 						// sopia bot emit
-						this.$s().$emit(liveId, msg.event, msg);
+						if ( msg.event === "live_message" ) {
+							this.$s().$emit(liveId, msg.event, msg);
+						}
 						
 						// for spoor chat
 						if ( msg.event === "live_present" ) {

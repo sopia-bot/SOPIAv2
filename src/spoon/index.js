@@ -323,7 +323,7 @@ class Spoon {
 
 		const context = this.__createContext(live_id);
 		if ( context.sopia.isRun ) {
-			context.spoon = msg.data;
+			context.spoon = OBJDump(msg.data);
 			vm.createContext(context);
 			const script = new vm.Script(this.script[type]);
 			try {
