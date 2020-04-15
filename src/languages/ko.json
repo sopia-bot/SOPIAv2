@@ -39,7 +39,9 @@
 			"invalid-seiral": "시리얼 형식이 맞지 않습니다.",
 			"invalid-id": "Id 형식이 올바르지 않습니다.",
 			"cert-fail": "인증 실패",
-			"login-fail": "로그인 실패"
+			"login-fail": "로그인 실패",
+			"not-auth-spoon": "본인 인증이 안 된 스푼 계정입니다.",
+			"auth-spoon": "본인 인증이 된 계정만 사용 가능합니다."
 		},
 		"logout": "로그아웃",
 		"auth": "인증",

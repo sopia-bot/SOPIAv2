@@ -208,7 +208,16 @@ export default {
 				this.noti.show = true;
 				this.loading.cert = false;
                 return;
-            }
+			}
+			
+			if ( this.userData && this.userData.grants && this.userData.grants.auth !== 1 ) {
+				this.noti.title = this.$t('login.error.serial-cert-fail');
+				this.noti.main = this.$t('login.error.not-auth-spoon');
+				this.noti.sub = this.$t('login.error.auth-spoon');
+				this.noti.show = true;
+				this.loading.cert = false;
+				return;
+			}
 
             const reqUrl = `${this.$store.getters.fbUrl}/certSerial/${serial}`;
             this.$http({
