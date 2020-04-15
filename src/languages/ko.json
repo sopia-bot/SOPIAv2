@@ -74,7 +74,12 @@
 			"listener": "청취자",
 			"like": "좋아요",
 			"sum": "누적 청취자"
-		}
+		},
+		"profile": {
+			"kick": "강퇴하기",
+			"manager": "매니저 지정"
+		},
+		"block": "정말로 강퇴하시겠습니까?"
 	},
 	"spoor": {
 		"setting": {
@@ -96,5 +101,6 @@
 		"save": "저장되었습니다."
 	},
 	"manager": "매니저",
-	"save": "저장"
+	"save": "저장",
+	"profile": "프로필"
 }

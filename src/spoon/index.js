@@ -63,12 +63,13 @@ class Spoon {
 					'pragma': "no-cache",
 				},
 			};
+			
+			const token = this.__getToken();
+			if ( typeof token === "string" && token.length > 0 ) {
+				obj.headers.authorization = this.__getToken();
+			}
 
 			if ( typeof data === "object" ) {
-				if ( reqUrl.match(/signin\/$/) ) {
-				} else {
-					obj.headers.authorization = this.__getToken();
-				}
 				obj.data = data;
 			}
 
@@ -334,6 +335,56 @@ class Spoon {
 			delete context.spoon;
 			this.__patchContext(context);
 		}
+	}
+
+	follow(user) {
+		return new Promise((resolve, reject) => {
+			this.$req('post', `/users/${user}/follow/`)
+				.then(res => {
+					resolve(res.results[0]);
+				})
+				.catch(reject);
+		});
+	}
+
+	unfollow(user) {
+		return new Promise((resolve, reject) => {
+			this.$req('post', `/users/${user}/unfollow/`)
+				.then(res => {
+					resolve(res.results[0]);
+				})
+				.catch(reject);
+		});
+	}
+
+	mini_profile(user) {
+		return new Promise((resolve, reject) => {
+			this.$req('get', `/users/${user}/mini_profile/`)
+				.then(res => {
+					resolve(res.results[0]);
+				})
+				.catch(reject);
+		});
+	}
+
+	managerApply(live_id, managers) {
+		return new Promise((resolve, reject) => {
+			this.$req('post', `/lives/${live_id}/manager/`, { manager_ids: managers })
+				.then(res => {
+					resolve(res.results[0]);
+				})
+				.catch(reject);
+		});
+	}
+
+	blockUser(live_id, user_id) {
+		return new Promise((resolve, reject) => {
+			this.$req('post', `/lives/${live_id}/block/`, { block_user_id: user_id })
+				.then(res => {
+					resolve(res.results[0]);
+				})
+				.catch(reject);
+		});
 	}
 };
 

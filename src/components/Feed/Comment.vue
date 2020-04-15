@@ -2,6 +2,7 @@
   <div class="media media-comment" style="margin-top: 1rem;">
     <!-- <img class="avatar avatar-lg media-comment-avatar rounded-circle" :src="userImage"> -->
     <img 
+      @click="avatarClick"
       :style="{ backgroundImage: 'url(' + userImage + ')' }"
       class="avatar avatar-lg media-comment-avatar rounded-circle"
       style="width: 42px; height:42px; background-position: center; background-repeat: no-repeat; background-size: cover;">
@@ -62,6 +63,15 @@
       type: {
         type: String,
         default: "",
+      },
+      user: {
+        type: Object,
+        default: {},
+      },
+    },
+    methods: {
+      avatarClick(evt) {
+        this.$emit('click', evt, this.user);
       }
     }
   }
