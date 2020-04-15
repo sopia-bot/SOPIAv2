@@ -6,7 +6,7 @@
 					<!-- S:HLS Player -->
 					<video ref="live-player" style="width: 0px; height: 0px; position: absolute;"></video>
 					<!-- E:HLS Player -->
-					<div class="row ma-0 align-items-center">
+					<div class="row ma-0 align-items-center" style="max-height: calc(100vh - 7.5rem); overflow-y: auto;">
 						<div
 							v-for="(con, idx) in controls"
 							:key="con.title + '-' + idx"
@@ -48,8 +48,8 @@
 						<!-- S:Live Info -->
 						<div
 							v-if="tab === 'live-chat'"
-							class="col col-12 mb-3">
-							<card>
+							class="col col-12 mb-0">
+							<card class="mb-0">
 								<div class="card-header bg-transparent py-1">
 									<h3>{{ $t('spoon.live.info.name') }}</h3>
 								</div>
@@ -383,6 +383,7 @@ export default {
 							"icon": "ni ni-favourite-28",
 							"itemClass": "btn-danger",
 							"key": "like-live",
+							"v-if": () => this.tab === 'live-chat',
 							"callback": (state) => {
 								this.$s(user.token).likeLive(liveId)
 									.then(res => {
@@ -424,6 +425,8 @@ export default {
 								this.live.data = null;
 								this.live.msgs = [];
 								this.live.chat = "";
+								console.log("============ close ============");
+								return;
 							}
 						}
 
