@@ -762,6 +762,13 @@ export default {
 
 		this.userData = app.get('user');
 
+		if ( sessionStorage['before-live'] && sessionStorage['before-live'] !== "undefined" ) {
+			const live = sessionStorage['before-live'];
+			sessionStorage['before-live'] = undefined;
+			this.selectLive(live);
+			return;
+		}
+
 		if ( app.get('spoon.filter') ) {
 			this.$s(app.get('user.token')).subscribedLive()
 				.then(res => {
@@ -772,7 +779,6 @@ export default {
 					if ( mini_profile.current_live && mini_profile.current_live.id ) {
 						this.$s().liveInfo(mini_profile.current_live.id)
 							.then(liveInfo => {
-								console.log(liveInfo, this.liveList);
 								this.liveList.unshift(liveInfo);
 							});
 					}
@@ -851,8 +857,11 @@ export default {
 					"v-if": () => !this.popupSpoon && !this.popupWindow,
 					"callback": () => {
 						this.$store.commit('popupSpoon', true);
+						if ( this.live.data ) {
+							sessionStorage['before-live'] = this.live.data.id;
+						}
 						this.$assign("/dashboard/");
-						ipcRenderer.send('spoon-popup');
+						ipcRenderer.send('spoon-popup', this.live.data);
 					}
 				},
 				{

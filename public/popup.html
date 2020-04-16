@@ -2,6 +2,21 @@
 <html>
 	<head>
 		<script>
+			const s2p = () => {
+				const params = {};
+				const search = location.search.replace(/^\?/, '');
+				const arr = search.split('&');
+				arr.forEach(p => {
+					const ps = p.split('=');
+					params[ps[0]] = ps[1] || '';
+				});
+				return params;
+			};
+			const params = s2p();
+
+			if ( params.l ) {
+				sessionStorage['before-live'] = parseInt(params.l, 10);
+			}
 			sessionStorage.setItem('popup', 'true');
 			location.assign("/");
 		</script>

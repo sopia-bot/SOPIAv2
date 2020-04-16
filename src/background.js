@@ -50,7 +50,7 @@ ipcMain.on('test-ipc', (event) => {
 });
 
 let isPopupedSpoon = false;
-ipcMain.on('spoon-popup', (event) => {
+ipcMain.on('spoon-popup', (event, liveInfo) => {
 	if ( isPopupedSpoon ) return;
 
 	isPopupedSpoon = true;
@@ -67,11 +67,20 @@ ipcMain.on('spoon-popup', (event) => {
 
 	if (process.env.WEBPACK_DEV_SERVER_URL) {
 		// Load the url of the dev server if in development mode
-		subwin.loadURL(process.env.WEBPACK_DEV_SERVER_URL + "popup.html")
+		let url = process.env.WEBPACK_DEV_SERVER_URL + "popup.html";
+		if ( liveInfo ) {
+			url += "?l=" + liveInfo.id;
+		}
+		subwin.loadURL(url)
 	} else {
 		createProtocol('app')
 		// Load the index.html when not in development
-		subwin.loadURL('app://./popup.html')
+		let url = 'app://./popup.html';
+		
+		if ( liveInfo ) {
+			url += "?l=" + liveInfo.id;
+		}
+		subwin.loadURL(url);
 	}
 
 	subwin.once('ready-to-show', () => {
