@@ -766,6 +766,16 @@ export default {
 			this.$s(app.get('user.token')).subscribedLive()
 				.then(res => {
 					this.liveList = res;
+					return this.$s().mini_profile(this.userData.id);
+				})
+				.then(mini_profile => {
+					if ( mini_profile.current_live && mini_profile.current_live.id ) {
+						this.$s().liveInfo(mini_profile.current_live.id)
+							.then(liveInfo => {
+								console.log(liveInfo, this.liveList);
+								this.liveList.unshift(liveInfo);
+							});
+					}
 				});
 		} else {
 			this.$s(app.get('user.token'));

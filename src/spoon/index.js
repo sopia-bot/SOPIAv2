@@ -386,6 +386,16 @@ class Spoon {
 				.catch(reject);
 		});
 	}
+
+	user(user_id) {
+		return new Promise((resolve, reject) => {
+			this.$req('get', `/users/${user_id}/`)
+				.then(res => {
+					resolve(res.results[0]);
+				})
+				.catch(reject);
+		})
+	}
 };
 
 export default {
