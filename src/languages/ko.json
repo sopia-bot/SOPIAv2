@@ -100,6 +100,14 @@
 		},
 		"save": "저장되었습니다."
 	},
+	"setting": {
+		"github-connect": "깃허브 계정 연동 상태",
+		"sopia-web": "소피아 홈페이지",
+		"view": "구경하기",
+		"sopia": {
+			"title": "소피아 설정"
+		}
+	},
 	"manager": "매니저",
 	"save": "저장",
 	"profile": "프로필"

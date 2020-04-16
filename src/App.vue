@@ -225,7 +225,7 @@ div.sidenav.custom li.nav-item a.nav-link.active span.nav-link-text {
 
 .nav-toggle-btn {
 	border-radius: 0;
-	position:absolute;
+	position:fixed;
 	top:0;
 	z-index:100;
 }
