@@ -4,7 +4,7 @@
             <div class="col-lg-5 col-md-7">
 				<!-- S:Card -->
                 <div class="card bg-secondary border-0 mb-0">
-                    <div class="card-header px-lg-5 bg-transparent pb-3">
+                    <div class="card-header px-lg-4 bg-transparent pb-3">
                         <div class="text-muted text-center mt-2 mb-3">
                             <small>{{ $t('login.input-serial') }}</small>
                         </div>
@@ -16,7 +16,7 @@
                         </base-input>
                     </div>
 					<!-- S:Login Success -->
-                    <div v-if="isLogin" class="card-body px-lg-5 py-lg-3">
+                    <div v-if="isLogin" class="card-body px-lg-4 py-lg-3">
 						<div class="row align-items-center">
 							<div class="col text-center">
 								<a href="#" @click="pmodal = true">
@@ -41,47 +41,48 @@
                         <div class="text-center text-muted mb-4">
 							<small>{{ $t('login.spoon-login') }}</small>
                         </div>
-                        <form role>
-                            <base-input alternative
-                                        class="mb-3"
-                                        name="id"
-                                        prepend-icon="ni ni-circle-08"
-                                        v-model="form.id"
-                                        placeholder="Id">
-                            </base-input>
+						<div class="mb-3">
+							<base-input alternative
+										name="id"
+										prepend-icon="ni ni-circle-08"
+										v-model="form.id"
+										placeholder="Id">
+							</base-input>
+						</div>
 
-                            <base-input alternative
-                                        class="mb-3"
-                                        name="Password"
-                                        prepend-icon="ni ni-lock-circle-open"
-                                        type="password"
-                                        v-model="form.passwd"
-                                        placeholder="Password">
-                            </base-input>
-                            <div class="text-center">
-								<!--
-								<base-button type="secondary" native-type="button" class="text-orange" @click="login">{{ $t('login.login') }}</base-button>
-								<base-button type="secondary" native-type="button" class="text-info" @click="snsLogin('facebook')">Facebook</base-button>
-								<base-button type="secondary" native-type="button" class="text-blue" @click="snsLogin('google')">Google</base-button>
-								-->
-								<VueLoadingButton
-									class="btn base-button btn-secondary text-orange"
-									@click.native="login"
-									:loading="loading.login"
-									>{{ $t('login.login') }}</VueLoadingButton>
+						<div class="mb-3">
+							<base-input alternative
+										class="mb-3"
+										name="Password"
+										prepend-icon="ni ni-lock-circle-open"
+										type="password"
+										v-model="form.passwd"
+										placeholder="Password">
+							</base-input>
+						</div>
+						<div class="text-center">
+							<!--
+							<base-button type="secondary" native-type="button" class="text-orange" @click="login">{{ $t('login.login') }}</base-button>
+							<base-button type="secondary" native-type="button" class="text-info" @click="snsLogin('facebook')">Facebook</base-button>
+							<base-button type="secondary" native-type="button" class="text-blue" @click="snsLogin('google')">Google</base-button>
+							-->
+							<VueLoadingButton
+								class="btn base-button btn-secondary text-orange"
+								@click.native="login"
+								:loading="loading.login"
+								>{{ $t('login.login') }}</VueLoadingButton>
 
-								<VueLoadingButton
-									class="btn base-button btn-secondary text-info"
-									@click.native="snsLogin('facebook')"
-									:loading="loading.facebook"
-									>Facebook</VueLoadingButton>
-								<VueLoadingButton
-									class="btn base-button btn-secondary text-orange"
-									@click.native="snsLogin('google')"
-									:loading="loading.google"
-									>Google</VueLoadingButton>
-                            </div>
-                        </form>
+							<VueLoadingButton
+								class="btn base-button btn-secondary text-info"
+								@click.native="snsLogin('facebook')"
+								:loading="loading.facebook"
+								>Facebook</VueLoadingButton>
+							<VueLoadingButton
+								class="btn base-button btn-secondary text-orange"
+								@click.native="snsLogin('google')"
+								:loading="loading.google"
+								>Google</VueLoadingButton>
+						</div>
                     </div>
 					<!-- E:Login Form -->
 

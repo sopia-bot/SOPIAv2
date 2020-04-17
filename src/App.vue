@@ -86,7 +86,7 @@ export default {
 		'$route' (to, from) {
 			if ( to.path === "/" ) {
 				if ( this.checkUserValid() ) {
-					this.$assign('/loading/');
+					this.$assign('/spoon/');
 				} else {
 					this.$assign('/login/');
 				}
@@ -115,11 +115,14 @@ export default {
 		});
 
 		if ( this.$route.path === "/" ) {
+			/*
 			if ( this.checkUserValid() ) {
 				this.$assign("/loading/");
 			} else {
 				this.$assign("/login/");
 			}
+			*/
+			this.$assign("/loading/");
 		}
 
 		if ( sessionStorage.getItem("popup") === "true" ) {

@@ -102,6 +102,8 @@
 	},
 	"setting": {
 		"github-connect": "깃허브 계정 연동 상태",
+		"restore-setting": "모든 설정 초기화",
+		"confirm-restore": "정말 모든 설정을 초기화 하시겠습니까?",
 		"sopia-web": "소피아 홈페이지",
 		"view": "구경하기",
 		"sopia": {

@@ -144,17 +144,31 @@ export default {
 
 			this.status = "complete";
 		},
+		checkUserValid() {
+			const cfg = this.$cfg('app');
+			const licenseTag = cfg.get('license.id');
+			const userTag = cfg.get('user.tag');
+			return (userTag || licenseTag) ? userTag === licenseTag : false;
+		},
 	},
 	async mounted() {
-		/* for debug
+		if ( 1 ) {
 		await sleep(3000);
 		await this.checkUpdate();
 		this.step++;
 		await this.checkFiles();
 		this.step++;
 		await sleep(500);
-		*/
-		this.$assign('/spoon/');
+		}
+		
+		this.$cfg('app').__loadConfigFile();
+		this.$cfg('admins').__loadConfigFile();
+		
+		if ( this.checkUserValid() ) {
+			this.$assign("/spoon/");
+		} else {
+			this.$assign("/login/");
+		}
 	},
 	data() {
 		return {

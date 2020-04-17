@@ -56,7 +56,7 @@ class Config {
 			this.cfg = JSON.parse(cfgStr);
 		} else {
 			this.cfg = {};
-			this.__saveConfigFile();
+			//this.__saveConfigFile();
 		}
 		return this.cfg;
 	}
