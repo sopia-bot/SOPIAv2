@@ -2,10 +2,10 @@
 	<div class="wrapper">
 		<base-button
 			type="secondary"
-			size="sm"
 			class="nav-toggle-btn d-xl-none"
 			@click="toggle"
 			:style="{ left: sideOpen ? '250px' : '0px' }"
+			style="padding: 5.5px !important;"
 			v-if="!hideSidebar && !popupWindow">
 			<i class="ni ni-bold-left" v-if="sideOpen"></i>
 			<i class="ni ni-bold-right" v-else></i>

@@ -45,7 +45,9 @@ class Spoon {
 	}
 
 	__getToken() {
-		return `Token ${this.token}`;
+		if ( this.token ) {
+			return `Token ${this.token}`;
+		}
 	}
 
 	$req(method, url, data) {

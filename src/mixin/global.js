@@ -62,8 +62,11 @@ function generateUUID() {
 	return head.concat(generateUUID.tail).join('-');
 };
 
+const ud = (src) => path.join(app.getPath('userData'), src);
+
 const configs = {
-	app: new Config(path.join(app.getPath('userData'), 'config.json')),
+	app: new Config(ud('config.json')),
+	admins: new Config(ud('admins.json')),
 }
 
 Vue.mixin({

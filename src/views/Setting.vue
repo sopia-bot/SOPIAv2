@@ -67,6 +67,14 @@
 					</div>
 				</div>
 				<!-- E:Row -->
+
+				<!-- S:Admins -->
+				<div class="row ma-0">
+					<div class="col col-12 px-0">
+						<admin-setting-form></admin-setting-form>
+					</div>
+				</div>
+				<!-- E:Admins -->
 			</div>
 		</div>
 		<!-- E:Row -->
@@ -76,6 +84,7 @@
 <script>
 import SopiaSettingForm from './Settings/SopiaSetting.vue';
 import PerformSettingForm from './Settings/PerformSetting.vue';
+import AdminSettingForm from './Settings/AdminSetting.vue';
 import UserCard from './Settings/UserCard.vue';
 import electron from 'electron';
 
@@ -84,6 +93,7 @@ export default {
 	components: {
 		SopiaSettingForm,
 		PerformSettingForm,
+		AdminSettingForm,
 		UserCard,
 	},
 	methods:{
