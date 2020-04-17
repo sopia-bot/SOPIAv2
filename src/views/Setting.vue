@@ -57,7 +57,16 @@
 					</div>
 				</div>
 				<!-- E:Row -->
-				<sopia-setting-form></sopia-setting-form>
+				<!-- S:Row -->
+				<div class="row ma-0">
+					<div class="col col-12 col-lg-6 pl-0 pr-0 pr-lg-3">
+						<sopia-setting-form></sopia-setting-form>
+					</div>
+					<div class="col col-12 col-lg-6 pl-0 pl-lg-3 pr-0">
+						<perform-setting-form></perform-setting-form>
+					</div>
+				</div>
+				<!-- E:Row -->
 			</div>
 		</div>
 		<!-- E:Row -->
@@ -66,6 +75,7 @@
 </template>
 <script>
 import SopiaSettingForm from './Settings/SopiaSetting.vue';
+import PerformSettingForm from './Settings/PerformSetting.vue';
 import UserCard from './Settings/UserCard.vue';
 import electron from 'electron';
 
@@ -73,6 +83,7 @@ export default {
 	name: 'Setting',
 	components: {
 		SopiaSettingForm,
+		PerformSettingForm,
 		UserCard,
 	},
 	methods:{

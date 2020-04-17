@@ -13,8 +13,9 @@
 		<div class="particle-wrapper">
 			<vue-particles
 				color="#f1f1f1"
+				v-if="particleRender"
 				:particleOpacity="0.6"
-				:particlesNumber="0"
+				:particlesNumber="particle"
 				shapeType="circle"
 				:particleSize="1"
 				linesColor="#acacac"
@@ -57,6 +58,7 @@
 <script>
 import electron from 'electron';
 const { ipcRenderer } = electron;
+import EventBus from '@/plugins/event-bus.js';
 
 
 export default {
@@ -104,6 +106,14 @@ export default {
 		}
 	},
 	mounted() {
+		EventBus.$on('perform-reload', () => {
+			this.particle = this.$cfg('app').get('perform.particle');
+			this.particleRender = false;
+			setTimeout(() => {
+				this.particleRender = true;
+			}, 100);
+		});
+
 		if ( this.$route.path === "/" ) {
 			if ( this.checkUserValid() ) {
 				this.$assign("/loading/");
@@ -135,6 +145,8 @@ export default {
 			isLoginPage: false,
 			hideSidebar: false,
 			sideOpen: false,
+			particle: this.$cfg('app').get('perform.particle'),
+			particleRender: true,
 			sideItems: [
 				{
 					link: {

@@ -1,79 +1,70 @@
 <template>
 	<card>
-	<div slot="header" class="row align-items-center">
-		<div class="col-8">
-			<h3 class="mb-0"> {{ $t('setting.sopia.title') }} </h3>
+		<div slot="header" class="row align-items-center">
+			<div class="col-8">
+				<h3 class="mb-0"> {{ $t('setting.sopia.title') }} </h3>
+			</div>
+			<div class="col-4 text-right">
+				<button @click="saveSetting" class="btn btn-sm btn-default">Save</button>
+			</div>
 		</div>
-		<div class="col-4 text-right">
-			<a href="#" class="btn btn-sm btn-primary">Save</a>
-		</div>
-	</div>
 
-	<div class="pl-lg-4">
-		<div class="row">
-			<div class="col-lg-6">
-				<base-input
-					type="text"
-					label="Username"
-					placeholder="Username"
-					v-model="user.username"
-					>
-				</base-input>
+		<!-- S:Only Manager -->
+		<div class="row justify-content-center mb-3">
+			<div class="col col-8">
+				{{ $t('setting.sopia.onlymanager') }}
 			</div>
-			<div class="col-lg-6">
-				<base-input
-					type="email"
-					label="Email address"
-					placeholder="mike@email.com"
-					v-model="user.email"
-					>
-				</base-input>
+			<div class="col col-4 text-right">
+				<base-switch v-model="sopia.onlymanager"></base-switch>
 			</div>
 		</div>
-		<div class="row">
-			<div class="col-lg-6">
-				<base-input
-					type="text"
-					label="First Name"
-					placeholder="First Name"
-					v-model="user.firstName"
-					>
-				</base-input>
+		<!-- E:Only Manager -->
+		<!-- S:Country -->
+		<div class="row justify-content-center align-items-center">
+			<div class="col col-8">
+				{{ $t('setting.sopia.country') }}
 			</div>
-			<div class="col-lg-6">
-				<base-input
-					type="text"
-					label="Last Name"
-					placeholder="Last Name"
-					v-model="user.lastName"
-					>
-				</base-input>
+			<div class="col col-4 text-right">
+				<el-select
+					class="select-danger"
+					v-model="sopia.country">
+					<el-option
+						v-for="country in countrys"
+						:key="country.value"
+						:value="country.value"
+						:label="country.label"
+						class="select-danger">
+					</el-option>
+				</el-select>
 			</div>
 		</div>
-	</div>
-
+		<!-- E:Country -->
 	</card>
 </template>
 <script>
+import { Select, Option } from 'element-ui';
+
 export default {
-	data() {
-		return {
-			user: {
-				company: 'Creative Code Inc.',
-				username: 'michael23',
-				email: '',
-				firstName: 'Mike',
-				lastName: 'Andrew',
-				address: 'Bld Mihail Kogalniceanu, nr. 8 Bl 1, Sc 1, Ap 09',
-				city: 'New York',
-				country: 'USA',
-				postalCode: '',
-				aboutMe: `Lamborghini Mercy, Your chick she so thirsty, I'm in that two seat Lambo.`
-			}
-		};
+	components: {
+		[Select.name]: Select,
+		[Option.name]: Option,
 	},
 	methods: {
-	}
+		saveSetting() {
+			this.$cfg('app').set('sopia', this.sopia);
+		},
+	},
+	data() {
+		return {
+			sopia: {
+				onlymanager: this.$cfg('app').get('sopia.onlymanager'),
+				country: this.$cfg('app').get('sopia.country') || "kr",
+			},
+			countrys: [
+				{ label: "한국", value: "kr" },
+			],
+		};
+	},
 };
 </script>
 <style></style>

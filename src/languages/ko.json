@@ -105,7 +105,14 @@
 		"sopia-web": "소피아 홈페이지",
 		"view": "구경하기",
 		"sopia": {
-			"title": "소피아 설정"
+			"title": "소피아 설정",
+			"onlymanager": "매니저일 때만 매니저 작동",
+			"country": "국가 선택"
+		},
+		"perform": {
+			"title": "성능 설정",
+			"particle": "배경 파티클 수준",
+			"live-collect": "방송 정보 수집"
 		}
 	},
 	"manager": "매니저",
