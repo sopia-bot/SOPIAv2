@@ -442,6 +442,7 @@ import InfiniteLoading from 'vue-infinite-loading';
 import Hls from 'hls.js';
 import Comment from '@/components/Feed/Comment';
 import electron from 'electron';
+import logger from '@/plugins/logger.js';
 const { ipcRenderer } = electron;
 
 export default {
@@ -561,9 +562,8 @@ export default {
 						if ( msg.event === "live_present" ) {
 							const spoor = this.$cfg('app').get('spoor');
 							const data = msg.data;
-							//console.log(spoor);
 							this.$cfg('app').set('spoor.minspoon', 1);
-							//console.log("spoor enable", spoor.enable, "data", data, "spoor minspoon", spoor.minspoon )
+							logger.debug('spoorchat', "spoor enable", spoor.enable, "data", data, "spoor minspoon", spoor.minspoon );
 							if ( spoor.enable && (data.combo * data.amount) >= spoor.minspoon )  {
 								this.$s().$sopia.pushUser(data.author);
 							}

@@ -8,9 +8,10 @@ import axios from 'axios';
 import electron from 'electron';
 import watch from 'node-watch';
 
-// author modules
+// plugin modules
 import Live from './live.js';
 import Sopia from './sopia.js';
+import logger from '@/plugins/logger.js';
 
 // global variables
 const { remote } = electron;
@@ -42,6 +43,9 @@ class Spoon {
 		this.var = {};
 		this.script = {};
 		this.$sopia = Sopia;
+
+		logger.success('spoon', 'Create spoon class');
+		logger.info('spoon', 'Token ', token);
 	}
 
 	__getToken() {
@@ -177,7 +181,7 @@ class Spoon {
 	}
 
 	$live(live_id, _config) {
-		const l = this.Lives[live_id];
+		const l = this.Live;
 		if ( l ) {
 			return l;
 		}
@@ -191,7 +195,7 @@ class Spoon {
 			config[k] = _config[k];
 		});
 
-		return this.Lives[live_id] = new Live(live_id, config);
+		return this.Live = new Live(live_id, config);
 	}
 
 	liveInfo(live_id) {
@@ -251,9 +255,10 @@ class Spoon {
 		if ( fs.existsSync(p) ) {
 			const code = fs.readFileSync(p, {encoding: 'utf8'});
 			this.script[type] = code;
+			logger.debug('spoon', `Load event script Type[${type}] at ${p}`);
 			return true;
 		} else {
-			console.error(`${p} is not exists.`);
+			logger.error('spoon', `${p} is not exists.`);
 			return false;
 		}
 	}
@@ -320,9 +325,12 @@ class Spoon {
 		const type = evt.replace("live_", "");
 		if ( !this.script[type] ) {
 			if ( !this.__loadEvtScript(type) ) {
+				logger.warn('emit', `No have event script Type[${type}]`);
 				return;
 			}
 		}
+
+		logger.debug('emit', `Emit ${live_id} event ${evt}`, msg);
 
 		const context = this.__createContext(live_id);
 		if ( context.sopia.isRun ) {

@@ -8,6 +8,7 @@ import { remote } from 'electron';
 
 // plugins import
 import c from '@/plugins/config.js';
+import logger from '@/plugins/logger.js';
 
 
 // global variable
@@ -146,7 +147,7 @@ const parser = (tts = "", signature = []) => {
 	});
 	reStr += ")";
 
-	//sopia.debug("tts signature parser", reStr);
+	logger.debug('spoorchat', "tts signature parser", reStr);
 	const re = new RegExp(reStr);
 	return tts.split(re);
 };
@@ -177,7 +178,7 @@ itv.add('spoorchat', () => {
 		tts.isrun = true;
 
 		const chatData = tts.stack.shift();
-		//sopia.debug("============= Spoor Chat =============");
+		logger.debug('spoorchat', "============= Spoor Chat =============");
 		fs.readFile(getPath('/media/SpoorChatNoti.mp3'), { encoding: 'base64' }, (err, data) => {
 			if ( err ) {
 				console.error(err);
@@ -193,7 +194,7 @@ itv.add('spoorchat', () => {
 				const sigKeys = Object.keys(signatures);
 				const argv = parser(chatData.message, sigKeys);
 				const readStack = new Array(argv.length);
-				//sopia.debug(argv);
+				logger.debug('spoorchat', 'chat message parse', argv);
 				
 				if ( Array.isArray(argv) ) {
 					// make sound array
@@ -201,7 +202,7 @@ itv.add('spoorchat', () => {
 						let sigFile = signatures[arg];
 						if ( sigFile ) {
 							// has signature
-							//sopia.debug("signature! ", sigFile);
+							logger.debug('spoorchat', "signature! ", sigFile);
 							const buf = fs.readFileSync(sigFile);
 							if ( path.extname(sigFile) === '.base64' ) {
 								readStack[idx] = buf.toString('utf8');
@@ -210,7 +211,7 @@ itv.add('spoorchat', () => {
 							}
 						} else {
 							if ( arg.trim() !== "" ) {
-								//sopia.debug("Run tts", arg.trim());
+								logger.debug('spoorchat', "Run tts", arg.trim());
 
 
 								read(arg.trim(), voiceType).then(buf => {
@@ -218,9 +219,9 @@ itv.add('spoorchat', () => {
 										readStack[idx] = buf;
 									} else {
 										// 이전과 동일한 tts로 나올 시 1회만 더 실행
-										//sopia.debug("I find matched file. 1 time retry. idx", idx);
+										logger.warn('spoorchat', "I find matched file. 1 time retry. idx", idx);
 										read(arg.trim(), voiceType).then(buf => {
-											//sopia.debug("success get buf. idx", idx);
+											logger.debug('spoorchat', 'success get buf. idx', idx);
 											readStack[idx] = buf;
 										});
 									}
@@ -272,7 +273,7 @@ itv.add('spoorchat', () => {
 								tts.isrun = false;
 								readStack.splice(0, readStack.length);
 								tts.stop = null;
-								//sopia.debug('speech finish');
+								logger.success('spoorchat', 'Speech finish');
 							}
 						}
 					}, 100); // thick 1ms
@@ -295,20 +296,19 @@ itv.add('spoorchat', () => {
 
 const pushTtsList = (data) => {
 	// spoorchat
-	// console.log("pushTtsList come!!!!!!!!!!!!!!!!!");
 	let idx = tts.user.findIndex(item => item.id === data.author.id);
 	if ( idx >= 0 ) {
 		tts.user.splice(idx, 1);
-		// console.log("idx is", idx, "message is", data.message);
 		tts.stack.push({
 			message: data.message,
 		});
+		logger.success('spoorchat', 'Push TTS list', data);
 	}
 };
 
 const pushUser = (author) => {
-	// console.log("pushUser", author);
 	tts.user.push({ id: author.id, thick: 0});
+	logger.success('spoorchat', "Push User", author);
 }
 
 

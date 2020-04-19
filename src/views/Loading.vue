@@ -152,7 +152,7 @@ export default {
 		},
 	},
 	async mounted() {
-		if ( 1 ) {
+		if ( 0 ) {
 		await sleep(3000);
 		await this.checkUpdate();
 		this.step++;
