@@ -68,6 +68,7 @@ export default {
 		toggle() {
 			this.sideOpen = !this.sideOpen;
 			this.$sidebar.displaySidebar(!this.$sidebar.showSidebar);
+			a = a.b;
 		},
 		sidebarClose() {
 			if ( this.$sidebar.showSidebar && window.innerWidth < 1200 ) {

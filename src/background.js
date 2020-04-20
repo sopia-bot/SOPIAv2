@@ -95,6 +95,19 @@ ipcMain.on('spoon-popup', (event, liveInfo) => {
 
 });
 
+const buildTime = (time) => {
+	const yyyy = time.getFullYear();
+	const mm = (time.getMonth()+1).toString().padStart(2, '0');
+	const dd = (time.getDate()).toString().padStart(2, '0');
+
+	const hh = time.getHours().toString().padStart(2, '0');
+	const MM = time.getMinutes().toString().padStart(2, '0');
+	const ss = time.getSeconds().toString().padStart(2, '0');
+
+	return `${yyyy}${mm}${dd}-${hh}${MM}${ss}`;
+};
+global.startTime = buildTime(new Date());
+
 global.snsLoginOpen = function(url) {
 	return new Promise((resolve, reject) => {
 		const snsBrowser = new BrowserWindow({
