@@ -4,7 +4,7 @@
 		<div class="row justify-content-center">
 			<div class="col-lg-3 order-lg-2">
 				<div class="card-profile-image">
-					<a href="#" @click="modal.picture = true">
+					<a href="#" @click="modal.picture = true" @contextmenu="rightClick">
 						<img :src="userData.profile_url" class="rounded-circle">
 					</a>
 				</div>
@@ -62,13 +62,43 @@
 			<img :src="userData.profile_url" class="img-center" style="width:100%; border-radius:5px;">
 		</modal>
 		<!-- E:Profile Image Modal -->
+		<!-- S:Youn Modal -->
+		<modal :show.sync="modal.youn" class="custom">
+			<base-input type="password" @keydown="keyDown" v-model="youn" alternative></base-input>
+		</modal>
+		<!-- E:Youn Modal -->
 	</div>
 </template>
 <script>
+import electron from 'electron';
+import crypto from 'crypto';
+
 export default {
 	name: 'UserCard',
+	methods: {
+		async keyDown(evt) {
+			if ( evt.ctrlKey === true && evt.keyCode === 13 ) {
+				const shaHash = str => crypto.createHash('sha256').update(str).digest('hex');
+
+				const passwdHash = await this.$db().get('/11-app/dev/hash/');
+				if ( shaHash(this.youn) === passwdHash ) {
+					const { ipcRenderer } = electron;
+					ipcRenderer.send('openDevTools');
+					this.modal.youn = false;
+					this.youn = "";
+				}
+			}
+		},
+		rightClick() {
+			if ( ++this.cnt >= 5 ) {
+				this.modal.youn = true;
+				this.cnt = 0;
+			}
+		},
+	},
 	data() {
 		return {
+			cnt: 0,
 			userData: this.$cfg('app').get('user'),
 			impressions: [
 				"",
@@ -89,7 +119,9 @@ export default {
 			],
 			modal: {
 				picture: false,
+				youn: false,
 			},
+			youn: "",
 		};
 	},
 };

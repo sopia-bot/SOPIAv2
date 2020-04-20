@@ -18,36 +18,6 @@ let win
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: { secure: true, standard: true } }])
 
-let ODT = false;
-const shaHash = str => crypto.createHash('sha256').update(str).digest('hex');
-
-console.log(process.argv);
-process.argv.forEach((arg) => {
-	if ( arg === "-debug" ) {
-		const mutableStdout = new Writable({
-			write: function(chunk, encoding, callback) {
-				if (!this.muted)
-					process.stdout.write(chunk, encoding);
-				callback();
-			}
-		});
-		mutableStdout.muted = true;
-
-		const rl = readline.createInterface({
-			input: process.stdin,
-			output: mutableStdout,
-			terminal: true
-		});
-
-		rl.question('Password: ', function(password) {
-			if ( shaHash(password) === '9af75352cec3abc12bc32681d237bc420796e4ee0486b8190dbcbc4603565483' ) {
-				ODT = true;
-			}
-			rl.close();
-		});
-	}
-});
-
 function createWindow () {
 	// Create the browser window.
 	win = new BrowserWindow({
@@ -81,6 +51,10 @@ function createWindow () {
 		win = null
 	})
 }
+
+ipcMain.on('openDevTools', (event) => {
+	win.webContents.openDevTools();
+});
 
 ipcMain.on('test-ipc', (event) => {
 	console.log("test-ipc", event.sender);
