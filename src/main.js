@@ -25,11 +25,13 @@ import '@/assets/css/style.css';
 import 'element-ui/lib/theme-chalk/index.css';
 import i18n from './plugins/i18n'
 import router from "./router/router";
+import Logger from './plugins/logger.js';
 
 // plugin setup
 Vue.use(DashboardPlugin);
 Vue.use(VueParticles);
 Vue.use(Transitions);
+Vue.use(Logger);
 
 /* eslint-disable no-new */
 new Vue({

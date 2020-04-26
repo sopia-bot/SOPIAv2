@@ -60,6 +60,12 @@ const canLogging = (group, type) => {
 
         const logGroup = window.logGroup || 'all';
         if ( logGroup === 'all' ) {
+            const regex = window.logRegex;
+            if ( regex ) {
+                if ( !group.match(regex) ) {
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -87,8 +93,20 @@ const debug    = (group = 'any', ...args) => canLogging(group, 'debug')    && co
 
 // debug
 window.logLevel = 7;
+window.logRegex = /^((?!(emit)).)*$/g
 
 export default {
+    install(Vue) {
+        Vue.prototype.$logger = {
+            critical,
+            alert,
+            err,
+            warn,
+            success,
+            info,
+            debug,
+        };
+    },
     critical,
     alert,
     err,

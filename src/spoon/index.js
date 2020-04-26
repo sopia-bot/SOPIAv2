@@ -186,6 +186,10 @@ class Spoon {
 			return l;
 		}
 
+		if ( !live_id ) {
+			return;
+		}
+
 		const config = {
 			auth: this.token,
 		};
@@ -408,8 +412,26 @@ class Spoon {
 	}
 };
 
+const s = new Spoon();
+
 export default {
-	Spoon: function(api, token) {
-		return new Spoon(api, token);
+	install(Vue) {
+		Vue.prototype.$s = (token, api) => {
+			if ( typeof token === "string" ) {
+				if ( s.token !== token ) {
+					s.token = token;
+					logger.success('spoon', `Update token info ${token}`);
+				}
+			}
+
+			if ( typeof api === "strign" ) {
+				if ( s.api !== api ) {
+					s.api = api;
+					logger.success('spoon', `Update api info ${api}`);
+				}
+			}
+
+			return s;
+		}
 	},
 };

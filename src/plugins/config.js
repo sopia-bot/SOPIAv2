@@ -1,6 +1,7 @@
 import fs from 'fs';
 import crypto from 'crypto';
 import path from 'path';
+import logger from '@/plugins/logger.js';
 
 const shaHash = str => crypto.createHash('sha256').update(str).digest('hex');
 
@@ -65,6 +66,7 @@ class Config {
 		const cfgStr = JSON.stringify(this.cfg);
 		const cfgB64 = this.__encoding(cfgStr);
 		fs.writeFileSync(this.cfgFile, cfgB64, { encoding: 'utf8' });
+		logger.success('cfg', `${this.cfgFile} save success`, this.cfg);
 		return;
 	}
 
@@ -92,6 +94,31 @@ class Config {
 		}
 		_set(this.cfg, 0);
 		this.__saveConfigFile();
+	}
+
+	overwrite(key, value) {
+		const sk = key.split('.');
+		const _overwrite = (obj, kidx = 0) => {
+			if ( sk.length-1 === kidx ) {
+				const oldValue = obj[sk[kidx]];
+
+				if ( typeof oldValue === "object" && typeof value === "object" ) {
+					const newKeys = Object.keys(value);
+					newKeys.forEach(k => {
+						oldValue[k] = value[k];
+					});
+				} else {
+					obj[sk[kidx]] = value;
+				}
+				return;
+			}
+
+			if ( typeof obj[sk[kidx]] === "undefined" ) {
+				obj[sk[kidx]] = {};
+			}
+
+			_overwrite(obj[sk[kidx]], kidx+1);
+		}
 	}
 
 	get(key) {

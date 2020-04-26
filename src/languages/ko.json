@@ -123,6 +123,11 @@
 			"del-complete": "유저의 관리자권한을 해지합니다."
 		}
 	},
+	"dashboard": {
+		"chat-save": "채팅 로그 저장",
+		"not-saving": "현재 로그를 저장하고 있지 않습니다.",
+		"saving-now": "로그 저장중"
+	},
 	"manager": "매니저",
 	"save": "저장",
 	"profile": "프로필",

@@ -365,7 +365,7 @@
 			<!-- E:Voice Type -->
 
 			<!-- S:Admin Tools -->
-			<div class="row ma-0 mt-4 justify-content-center" v-if="isAdmin(userData) && !['dj', 'me'].includes(isAdmin(selectedUser))">
+			<div class="row ma-0 mt-4 justify-content-center" v-if="['dj', 'manager'].includes(isAdmin(userData)) && !['dj', 'me'].includes(isAdmin(selectedUser))">
 				<!-- S:Block User -->
 				<div class="col text-center">
 					<p>
@@ -562,7 +562,6 @@ export default {
 						if ( msg.event === "live_present" ) {
 							const spoor = this.$cfg('app').get('spoor');
 							const data = msg.data;
-							this.$cfg('app').set('spoor.minspoon', 1);
 							logger.debug('spoorchat', "spoor enable", spoor.enable, "data", data, "spoor minspoon", spoor.minspoon );
 							if ( spoor.enable && (data.combo * data.amount) >= spoor.minspoon )  {
 								this.$s().$sopia.pushUser(data.author);
@@ -702,9 +701,15 @@ export default {
 			if ( this.live.data ) {
 				const live = this.live.data;
 
-				if ( live.author.id === author.id ) return 'dj';
-				if ( this.userData.id === author.id ) return 'me';
-				if ( live.manager_ids.includes(author.id) ) return 'manager';
+				if ( live.author.id === author.id ) {
+					return 'dj';
+				}
+				if ( this.userData.id === author.id ) {
+					return 'me';
+				}
+				if ( live.manager_ids.includes(author.id) ) {
+					return 'manager';
+				}
 			}
 			return false;
 		},

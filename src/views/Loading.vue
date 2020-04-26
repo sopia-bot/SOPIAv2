@@ -39,6 +39,7 @@
 <script>
 import fs from 'fs';
 import path from 'path';
+import logger from '@/plugins/logger.js';
 
 const sleep = (delay) => {
 	return new Promise((resolve, reject) => {
@@ -148,6 +149,9 @@ export default {
 			const cfg = this.$cfg('app');
 			const licenseTag = cfg.get('license.id');
 			const userTag = cfg.get('user.tag');
+
+			logger.info('loading', 'User info ', cfg.get('user'));
+			
 			return (userTag || licenseTag) ? userTag === licenseTag : false;
 		},
 	},
@@ -165,6 +169,8 @@ export default {
 		this.$cfg('admins').__loadConfigFile();
 		
 		if ( this.checkUserValid() ) {
+			const userInfo = await this.$s().user(this.$cfg('app').get('user.id'));
+			this.$cfg('app').overwrite('user', userInfo);
 			this.$assign("/spoon/");
 		} else {
 			this.$assign("/login/");
