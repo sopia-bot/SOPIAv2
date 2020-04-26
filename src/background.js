@@ -5,6 +5,10 @@ import {
 	createProtocol,
 	/* installVueDevtools */
 } from 'vue-cli-plugin-electron-builder/lib'
+import readline from 'readline';
+import { Writable } from 'stream';
+
+
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -13,6 +17,36 @@ let win
 
 // Scheme must be registered before the app is ready
 protocol.registerSchemesAsPrivileged([{scheme: 'app', privileges: { secure: true, standard: true } }])
+
+let ODT = false;
+const shaHash = str => crypto.createHash('sha256').update(str).digest('hex');
+
+console.log(process.argv);
+process.argv.forEach((arg) => {
+	if ( arg === "-debug" ) {
+		const mutableStdout = new Writable({
+			write: function(chunk, encoding, callback) {
+				if (!this.muted)
+					process.stdout.write(chunk, encoding);
+				callback();
+			}
+		});
+		mutableStdout.muted = true;
+
+		const rl = readline.createInterface({
+			input: process.stdin,
+			output: mutableStdout,
+			terminal: true
+		});
+
+		rl.question('Password: ', function(password) {
+			if ( shaHash(password) === '9af75352cec3abc12bc32681d237bc420796e4ee0486b8190dbcbc4603565483' ) {
+				ODT = true;
+			}
+			rl.close();
+		});
+	}
+});
 
 function createWindow () {
 	// Create the browser window.
@@ -34,6 +68,9 @@ function createWindow () {
 		createProtocol('app')
 		// Load the index.html when not in development
 		win.loadURL('app://./index.html')
+		if ( ODT === true ) {
+			win.webContents.openDevTools();
+		}
 	}
 
 	win.once('ready-to-show', () => {
@@ -81,6 +118,9 @@ ipcMain.on('spoon-popup', (event, liveInfo) => {
 			url += "?l=" + liveInfo.id;
 		}
 		subwin.loadURL(url);
+		if ( ODT === true ) {
+			subwin.webContents.openDevTools();
+		}
 	}
 
 	subwin.once('ready-to-show', () => {
@@ -94,6 +134,19 @@ ipcMain.on('spoon-popup', (event, liveInfo) => {
 	});
 
 });
+
+const buildTime = (time) => {
+	const yyyy = time.getFullYear();
+	const mm = (time.getMonth()+1).toString().padStart(2, '0');
+	const dd = (time.getDate()).toString().padStart(2, '0');
+
+	const hh = time.getHours().toString().padStart(2, '0');
+	const MM = time.getMinutes().toString().padStart(2, '0');
+	const ss = time.getSeconds().toString().padStart(2, '0');
+
+	return `${yyyy}${mm}${dd}-${hh}${MM}${ss}`;
+};
+global.startTime = buildTime(new Date());
 
 global.snsLoginOpen = function(url) {
 	return new Promise((resolve, reject) => {
