@@ -168,10 +168,16 @@ export default {
 		this.$cfg('app').__loadConfigFile();
 		this.$cfg('admins').__loadConfigFile();
 		
+		const userId = this.$cfg('app').get('user.id');
 		if ( this.checkUserValid() ) {
-			const userInfo = await this.$s().user(this.$cfg('app').get('user.id'));
-			this.$cfg('app').overwrite('user', userInfo);
-			this.$assign("/spoon/");
+			try {
+				const userInfo = await this.$s().user(userId);
+				this.$cfg('app').overwrite('user', userInfo);
+				this.$assign("/spoon/");
+			} catch(err) {
+				this.$logger.err('loading', `ID:${userId} 유저 정보를 가져오는 데 실패했습니다.`);
+				this.$assign("/login/");
+			}
 		} else {
 			this.$assign("/login/");
 		}

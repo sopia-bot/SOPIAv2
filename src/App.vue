@@ -86,7 +86,7 @@ export default {
     },
 	watch: {
 		'$route' (to, from) {
-			logger.info('route', `change route "${from.path}" to "${to.path}"`);
+			logger.info('route', `라우트를 "${from.path}" 에서 "${to.path}" 로 변경합니다.`);
 			if ( to.path === "/" ) {
 				if ( this.checkUserValid() ) {
 					this.$assign('/spoon/');
