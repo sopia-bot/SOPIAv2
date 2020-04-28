@@ -1,3 +1,26 @@
+// native modules
+import path from 'path';
+import fs from 'fs';
+
+// package modules
+import electron from 'electron';
+
+import logger from '@/plugins/logger.js';
+
+// global variable
+const { remote } = electron;
+const { app } = remote;
+
+const ud = (src) => path.join(app.getPath('userData'), src);
+
+const dateYYYYMMDD = () => {
+	const date = new Date();
+	const year = date.getFullYear().toString().padStart(0, 4);
+	const month = (date.getMonth()+1).toString().padStart(0, 2);
+	const day = date.getDate().toString().padStart(0, 2);
+	return `${year}${month}${day}`;
+}
+
 export default class Live {
 	constructor(live_id, config = {}, wsServer) {
 		this.live_id = live_id.toString();
@@ -6,6 +29,14 @@ export default class Live {
 		this.wsServer = wsServer || "wss://heimdallr.spooncast.net";
 		this.isConnect = false;
 		this.healthIntTerm = 30;
+
+		this.onItem = {};
+		this.onceItem = {};
+		this.overonItem = {};
+
+		// save chat
+		this.isSaveChat = false;
+		this.saveFile = '';
 
 		const keys = Object.keys(config);
 		keys.forEach(k => {
@@ -45,6 +76,51 @@ export default class Live {
 		this.ws.onclose = callback;
 	}
 
+	on(key, func) {
+		if ( typeof this.onItem[key] === "object" && Array.isArray(this.onItem[key]) ) {
+			this.onItem[key].push(func);
+		} else {
+			this.onItem[key] = [
+				func,
+			];
+		}
+	}
+
+	once(key, func) {
+		if ( typeof this.onceItem[key] === "object" && Array.isArray(this.onceItem[key]) ) {
+			this.onceItem[key].push(func);
+		} else {
+			this.onceItem[key] = [
+				func,
+			];
+		}
+	}
+
+	overon(key, func) {
+		this.overonItem[key] = func;
+	}
+
+	emit(key, ...data) {
+		if ( typeof this.onItem[key] === "object" && Array.isArray(this.onItem[key]) ) {
+			this.onItem[key].forEach(func => {
+				if ( typeof func === "function" ) {
+					func(...data);
+				}
+			});
+		}
+		if ( typeof this.onceItem[key] === "object" && Array.isArray(this.onceItem[key]) ) {
+			this.onceItem[key].forEach(func => {
+				if ( typeof func === "function" ) {
+					func(...data);
+				}
+			});
+			this.onceItem[key] = [];
+		}
+		if ( typeof this.overonItem[key] === "function" ) {
+			this.overonItem[key](...data);
+		}
+	}
+
 	connect() {
 		if ( this.isConnect ) {
 			return false;
@@ -53,6 +129,25 @@ export default class Live {
 		this.ws = new WebSocket(`${this.wsServer}/${this.live_id}`);
 		this.ws.onmessage = (msg) => {
 			const e = JSON.parse(msg.data);
+			const time = new Date();
+
+			// dashboard admins infomation
+			if ( ["live_update", "live_leave"].includes(e.event) ) {
+				this.info = e.data.live;
+				this.emit('admin-info', this.info);
+			}
+
+			// save chat
+			if ( this.isSaveChat ) {
+				if (  e.event === "live_message" ) {
+					const nickname = e.data.author.nickname;
+					fs.appendFile(this.saveFile, `[${nickname}][${time.toLocaleTimeString()}] ${e.data.message}\n`, {encoding: 'utf8'}, (err) => {
+						if (err) {
+							logger.error(err);
+						}
+					});
+				}
+			}
 
 			if ( e.event === "live_state" ) {
 				this.healthInterval = setInterval(() => {
@@ -116,5 +211,32 @@ export default class Live {
 			event: "live_message",
 			type: "live_rpt",
 		});
+	}
+
+	startSaveChat() {
+		if ( !this.isSaveChat ) {
+			const chatLogFolder = ud('chat-logs');
+			if ( !fs.existsSync(chatLogFolder) ) {
+				fs.mkdirSync(chatLogFolder);
+			}
+
+			const time = dateYYYYMMDD();
+			this.saveFile = path.join(chatLogFolder, `${time}-${this.info.id}.log`);
+			
+			fs.writeFile(this.saveFile, `${new Date(this.info.created).toLocaleTimeString()} 에 만들어진 라이브의 채팅 로그입니다.\n\n`, { encoding: 'utf8' }, (err) => {
+				if ( err ) { 
+					logger.error(err);
+				}
+			});
+			this.isSaveChat = true;
+			logger.info('live', '세이브 파일 저장을 시작합니다.');
+		}
+	}
+
+	stopSaveChat() {
+		if ( this.isSaveChat ){
+			logger.info('live', '세이브 파일 저장을 종료합니다.');
+			this.isSaveChat = false;
+		}
 	}
 }

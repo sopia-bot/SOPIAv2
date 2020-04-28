@@ -25,7 +25,7 @@ import '@/assets/css/style.css';
 import 'element-ui/lib/theme-chalk/index.css';
 import i18n from './plugins/i18n'
 import router from "./router/router";
-import logger from './plugins/logger.js';
+import Logger from './plugins/logger.js';
 import electron from 'electron';
 import fs from 'fs';
 import path from 'path';
@@ -37,10 +37,11 @@ const { app } = remote;
 Vue.use(DashboardPlugin);
 Vue.use(VueParticles);
 Vue.use(Transitions);
+Vue.use(Logger);
 
 // config
 Vue.config.errorHandler = function(err, vm, info) {
-	logger.critical('error', err);
+	Logger.critical('error', err);
 
 	let str = "";
 		str += `${new Date().toLocaleString()}\n`;

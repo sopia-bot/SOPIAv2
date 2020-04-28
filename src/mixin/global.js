@@ -17,7 +17,6 @@ import version from '@/version.json';
 // global variable
 const { remote } = electron;
 const { app } = remote;
-const Spoon = s.Spoon;
 const Config = c.Config;
 
 const jsOrPath = (code) => {
@@ -28,6 +27,8 @@ const jsOrPath = (code) => {
 		return 'code';
 	}
 };
+
+Vue.use(s);
 
 // 사용자 컴퓨터의 UUID를 생성한다.
 function generateUUID() {
@@ -114,20 +115,6 @@ Vue.mixin({
 					line,
 					stack: err.stack,
 				};
-			}
-		},
-		$s(token, api) {
-			if ( this._data && this._data._spoon ) {
-				if ( typeof token === "string" ) {
-					this._data._spoon.token = token;
-				}
-				return this._data._spoon;
-			}
-
-			if ( this._data ) {
-				return this._data._spoon = new Spoon(token, api);
-			} else {
-				return new Spoon(token, api);
 			}
 		},
 		$remote() {

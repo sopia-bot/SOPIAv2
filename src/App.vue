@@ -15,7 +15,7 @@
 				color="#f1f1f1"
 				v-if="particleRender"
 				:particleOpacity="0.6"
-				:particlesNumber="particle"
+				:particlesNumber="particle || 0"
 				shapeType="circle"
 				:particleSize="1"
 				linesColor="#acacac"
@@ -59,6 +59,7 @@
 import electron from 'electron';
 const { ipcRenderer } = electron;
 import EventBus from '@/plugins/event-bus.js';
+import logger from '@/plugins/logger.js';
 
 
 export default {
@@ -85,6 +86,7 @@ export default {
     },
 	watch: {
 		'$route' (to, from) {
+			logger.info('route', `change route "${from.path}" to "${to.path}"`);
 			if ( to.path === "/" ) {
 				if ( this.checkUserValid() ) {
 					this.$assign('/spoon/');
