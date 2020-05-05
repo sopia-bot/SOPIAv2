@@ -142,12 +142,13 @@ export default {
 					"key": "ungroup-window",
 					"v-if": () => !this.popupSpoon && !this.popupWindow,
 					"callback": () => {
-						this.$store.commit('popupSpoon', true);
-						if ( this.live.data ) {
-							sessionStorage['before-live'] = this.live.data.id;
+                        this.$store.commit('popupSpoon', true);
+                        const live = this.$s().$live();
+						if ( live && live.data ) {
+							sessionStorage['before-live'] = live.data.id;
 						}
 						this.$assign("/dashboard/");
-						ipcRenderer.send('spoon-popup', this.live.data);
+						ipcRenderer.send('spoon-popup', (live && live.data) || null);
 					}
 				},
 				{

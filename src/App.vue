@@ -115,17 +115,6 @@ export default {
 			}, 100);
 		});
 
-		if ( this.$route.path === "/" ) {
-			/*
-			if ( this.checkUserValid() ) {
-				this.$assign("/loading/");
-			} else {
-				this.$assign("/login/");
-			}
-			*/
-			this.$assign("/loading/");
-		}
-
 		if ( sessionStorage.getItem("popup") === "true" ) {
 			this.popupWindow = true;
 		}
@@ -141,6 +130,21 @@ export default {
 		this.$store.watch(() => this.$store.getters.popupSpoon, (val) => {
 			this.popupSpoon = this.$store.getters.popupSpoon;
 		});
+
+		if ( this.$route.path === "/" ) {
+			/*
+			if ( this.checkUserValid() ) {
+				this.$assign("/loading/");
+			} else {
+				this.$assign("/login/");
+			}
+			*/
+			if ( sessionStorage.getItem("popup") === "true" ) {
+				this.$assign('/spoon/');
+			} else {
+				this.$assign("/loading/");
+			}
+		}
 	},
 	data() {
 		return {
