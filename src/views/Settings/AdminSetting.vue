@@ -114,7 +114,6 @@
 </template>
 <script>
 import { Select, Option } from 'element-ui';
-import EventBus from '@/plugins/event-bus.js';
 import VueLoadingButton from 'vue-loading-button';
 
 export default {
