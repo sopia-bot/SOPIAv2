@@ -43,7 +43,6 @@
 </template>
 <script>
 import { Select, Option } from 'element-ui';
-import EventBus from '@/plugins/event-bus.js';
 
 export default {
 	components: {
@@ -53,7 +52,7 @@ export default {
 	methods: {
 		saveSetting() {
 			this.$cfg('app').set('perform', this.perform);
-			EventBus.$emit('perform-reload');
+			this.$evt.$emit('perform-reload');
 		},
 	},
 	data() {

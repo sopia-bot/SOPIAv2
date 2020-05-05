@@ -58,7 +58,6 @@
 <script>
 import electron from 'electron';
 const { ipcRenderer } = electron;
-import EventBus from '@/plugins/event-bus.js';
 import logger from '@/plugins/logger.js';
 
 
@@ -108,7 +107,7 @@ export default {
 		}
 	},
 	mounted() {
-		EventBus.$on('perform-reload', () => {
+		this.$evt.$on('perform-reload', () => {
 			this.particle = this.$cfg('app').get('perform.particle');
 			this.particleRender = false;
 			setTimeout(() => {

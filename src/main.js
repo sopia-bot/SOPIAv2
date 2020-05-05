@@ -39,6 +39,9 @@ Vue.use(VueParticles);
 Vue.use(Transitions);
 Vue.use(Logger);
 
+// Event Bus
+Vue.prototype.$evt = new Vue();
+
 // config
 Vue.config.errorHandler = function(err, vm, info) {
 	Logger.critical('error', err);
