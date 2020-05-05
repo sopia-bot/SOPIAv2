@@ -156,6 +156,11 @@ export default {
 						// login success
 						this.userData = res;
 						this.isLogin = true;
+
+						const cfg = this.$cfg('app');
+						cfg.set('license.login.type', 'nomal');
+						cfg.set('license.login.id', this.form.id);
+						cfg.set('license.login.passwd', this.form.passwd);
 						return;
 					}
 				})
@@ -175,6 +180,10 @@ export default {
 					if ( res.result_code === 1 ) {
 						this.userData = res;
 						this.isLogin = true;
+
+						
+						const cfg = this.$cfg('app');
+						cfg.set('license.login.type', type);
 						return;
 					}
 

@@ -147,12 +147,21 @@ export default {
 		},
 		checkUserValid() {
 			const cfg = this.$cfg('app');
-			const licenseTag = cfg.get('license.id');
-			const userTag = cfg.get('user.tag');
+			const login = cfg.get('license.login');
 
-			logger.info('loading', 'User info ', cfg.get('user'));
-			
-			return (userTag || licenseTag) ? userTag === licenseTag : false;
+			if ( login ) {
+				switch ( login.type ) {
+					case "facebook":
+					case "google":
+						return this.$s().snsLogin(login.type);
+					case "nomal":
+						return this.$s().login(login.id, login.passwd);
+				}
+			}
+				
+			return new Promise((resolve, reject) => {
+				reject();
+			});
 		},
 	},
 	async mounted() {
@@ -168,19 +177,16 @@ export default {
 		this.$cfg('app').__loadConfigFile();
 		this.$cfg('admins').__loadConfigFile();
 		
-		const userId = this.$cfg('app').get('user.id');
-		if ( this.checkUserValid() ) {
-			try {
-				const userInfo = await this.$s().user(userId);
+		this.checkUserValid()
+			.then((userInfo) => {
+				this.$logger.info('loading', '로그인한 유저 정보', userInfo);
 				this.$cfg('app').overwrite('user', userInfo);
 				this.$assign("/spoon/");
-			} catch(err) {
-				this.$logger.err('loading', `ID:${userId} 유저 정보를 가져오는 데 실패했습니다.`);
+			})
+			.catch(() => {
+				this.$logger.err('loading', `유저 정보를 가져오는 데 실패했습니다.`);
 				this.$assign("/login/");
-			}
-		} else {
-			this.$assign("/login/");
-		}
+			});
 	},
 	data() {
 		return {
