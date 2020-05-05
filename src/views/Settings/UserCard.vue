@@ -5,7 +5,11 @@
 			<div class="col-lg-3 order-lg-2">
 				<div class="card-profile-image">
 					<a href="#" @click="modal.picture = true" @contextmenu="rightClick">
-						<img :src="userData.profile_url" class="rounded-circle">
+						<!-- <img :src="userData.profile_url" class="rounded-circle"> -->
+						<img
+							:style="{ backgroundImage: 'url(' + userData.profile_url + ')' }"
+							class="rounded-circle ma-0"
+							style="height: 150px; width:150px; background-position:center; background-repeat: no-repeat; background-size: cover;">
 					</a>
 				</div>
 			</div>
