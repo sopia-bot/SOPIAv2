@@ -1,5 +1,5 @@
 <template>
-    <div class="container" style="height:100vh" v-if="!live">
+    <div class="container" style="height:100vh" v-if="!isConnect">
 		<div class="row align-items-center justify-content-center" style="height: 100%">
 			<div class="col-lg-7 col-md-10">
 				<!-- S:Card -->
@@ -47,13 +47,9 @@ export default {
         LiveAdmins,
         LiveSave,
     },
-    mounted() {
-        this.live = this.$s().$live() || null;
-        console.log(this.live);
-    },
     data() {
         return {
-            live: null,
+            isConnect: this.$s().$live() && this.$s().$live().isConnect,
         };
     },
 }
