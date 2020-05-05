@@ -94,6 +94,17 @@ export default {
 		},
 	},
 	mounted() {
+		if ( typeof this.spoor === "undefined" ) {
+			this.spoor = {
+				'enable': false,
+				'type': 'random',
+				'minspoon': 1,
+				'effectvolume': 50,
+				'ttsvolume': 100,
+				'toutspoor': 30,
+			};
+			this.$cfg('app').set('spoor', this.spoor);
+		}
 		this.settings = [
 				{
 					name: this.$t('spoor.setting.enable'),
