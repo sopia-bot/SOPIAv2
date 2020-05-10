@@ -7,11 +7,11 @@
 			<!-- S:Profile -->
             <div class="row ma-0 justify-content-center">
 				<div class="col col-4">
-					<img 
-						class="rounded-circle img-center img-fluid"
-						style="width: 200px; cursor: pointer;"
+					<img
+						:style="{ backgroundImage: 'url(' + selectedUser.profile_url + ')' }"
+						class="rounded-circle ma-0  img-center img-fluid"
 						@click="modal.picture = true"
-						:src="selectedUser.profile_url">
+						style="height: 120px; width:120px; background-position:center; background-repeat: no-repeat; background-size: cover;">
 				</div>
 				<div class="col justify-content-start">
 					<h3 class="ma-0">{{ selectedUser.nickname }}</h3>
