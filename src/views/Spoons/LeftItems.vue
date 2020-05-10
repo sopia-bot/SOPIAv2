@@ -196,12 +196,18 @@ export default {
 						if ( state ) {
 							this.$s(app.get('user.token')).subscribedLive()
 								.then(res => {
-									this.liveList = res;
+                                    this.$evt.$emit('live-list', {
+                                        type: 'overwrite',
+                                        data: res
+                                    });
 								});
 						} else {
 							this.$s().getLive()
 								.then(res => {
-									this.liveList = res;
+									this.$evt.$emit('live-list', {
+                                        type: 'overwrite',
+                                        data: res
+                                    });
 								});
 						}
 					},
