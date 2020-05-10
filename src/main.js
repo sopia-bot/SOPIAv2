@@ -29,6 +29,7 @@ import Logger from './plugins/logger.js';
 import electron from 'electron';
 import fs from 'fs';
 import path from 'path';
+import LiquorTree from 'liquor-tree';
 
 const { remote } = electron;
 const { app } = remote;
@@ -38,6 +39,7 @@ Vue.use(DashboardPlugin);
 Vue.use(VueParticles);
 Vue.use(Transitions);
 Vue.use(Logger);
+Vue.use(LiquorTree);
 
 // Event Bus
 Vue.prototype.$evt = new Vue();

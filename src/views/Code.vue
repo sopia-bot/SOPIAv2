@@ -46,7 +46,7 @@
         </modal>
 		<!-- S:Notification -->
 		<div class="row ma-0" style="height: 100vh">
-			<div class="col-4 col-md-3" style="padding-top:20px;">
+			<div class="col-4 col-md-3" style="padding-top:20px; height: 100%;">
 				<div class="row ma-0 mb-3">
 					<div class="col col-12 text-right">
 						<el-tooltip
@@ -65,41 +65,88 @@
 						</el-tooltip>
 					</div>
 				</div>
-				<div class="row ma-0">
+				<div class="row ma-0" style="height: 100%; overflow: auto;">
 					<div class="col col-12">
-						<v-jstree
-							:data="folderTree"
-							:async="folderTreeAsync"
-							whole-row
-							show-checkbox
-							ref="tree"
-							v-if="jstreeRender"
-							:item-events="itemEvents"
-							size="large"
-							class="h4 custom text-white"
-							style="height: 100%; overflow-x: auto; font-weight:300"
-							@item-click="FitemClick" />
-							<div v-else class="text-white">
-								Not Thing
-							</div>
+						<div v-if="treeRenderer">
+							<tree
+								class="custom"
+								ref="tree"
+								:key="folderKey"
+								:data.sync="folderTree">
+								<span class="tree-text" slot-scope="{ node }">
+									<!-- S:Folder -->
+									<template v-if="node.hasChildren()">
+										<div @contextmenu.stop="itemContextMenu($event, node)">
+											{{ node.text }}
+										</div> 
+									</template>
+									<!-- E:Folder -->
+
+									<!-- S:File -->
+									<template v-else>
+										<div @contextmenu.stop="itemContextMenu($event, node)">
+											<i :class="node.data.icon"></i>
+											{{ node.text }}
+										</div>
+									</template>
+									<!-- E:File -->
+								</span>
+							</tree>
+						</div>
 					</div>
 				</div>
 			</div>
-			<div class="col-8 col-md-9 pa-0">
-				<MonacoEditor
-					ref="code-editor"
-					class="editor"
-					v-model="code"
-					language="javascript"
-					@editorDidMount="editorDidMount"
-					:options="editorOption"/>
+			<div class="col-8 col-md-9 pa-0" style="background-color: #252526;">
+				<div
+					v-if="openedTabs.length > 0"
+					class="row ma-0">
+					<div class="col col-12 pa-0 ma-0" style="background-color: #2D2D2D; max-width: 100%;">
+						<div class="d-flex" style="min-height: calc( 23px + 1.4rem ); overflow-x: auto;">
+							<div
+								v-for="(tab, idx) in openedTabs"
+								:key="idx + 'tab' + tab.data.value"
+								class="d-inline-flex text-white align-items-center custom"
+								:style="{ backgroundColor: tab.data.value === selectPath ? '#1E1E1E' : 'transparent' }"
+								@click="FitemClick(tab)"
+								style="padding: 0.7rem 1.5rem; cursor: pointer;">
+								<i :class="iconFinder(extname(tab.data.value))"></i>
+								<p class="mx-2" style="pointer-events: none; font-size: 0.85rem;">{{ tab.text }}</p>
+								<i @click.stop="closeTab(tab, idx)" class="ni ni-fat-remove" style="cursor: pointer;"></i>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="row ma-0 align-items-center" style="height: 100%;">
+					<div
+						v-if="openedTabs.length > 0"
+						class="col col-12 ma-0 pa-0"
+						style="height:100%; box-shadow: 5px 0px 2px 3px black;">
+						<MonacoEditor
+							ref="code-editor"
+							class="editor"
+							v-model="editor.code"
+							:language="editor.language"
+							@editorDidMount="editorDidMount"
+							:theme="editor.theme"
+							:options="editor.options"/>
+					</div>
+					<div
+						v-else
+						class="col col-12 text-center"
+						style="pointer-events: none;">
+						<h1 style="color: #848484; pointer-events: none;">{{ $t('code.not-opened') }}</h1>
+						<p
+							v-for="desc in $t('code.open-desc')"
+							:key="desc"
+							style="color: #848484; pointer-events: none;">{{ desc }}</p>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
 </template>
 <script>
 import MonacoEditor from 'vue-monaco';
-import VJstree from '@/plugins/vue-jstree.js';
 import fs from 'fs';
 import path from 'path';
 import { ncp } from 'ncp';
@@ -107,23 +154,46 @@ import rimraf from 'rimraf';
 import { shell } from 'electron';
 
 const iconFinder = (ext) => {
-	switch (ext) {
+	switch (ext.toLowerCase()) {
+		case ".md": return "fab fa-markdown";
 		case ".js": return "fab fa-js";
+		case ".vue": return "fab fa-vuejs";
+		case ".json": return "fas fa-bullseye";
+		case ".html": return "fab fa-html5";
 	}
 	return "fa fa-file";
 };
+
+const getLanguage = (ext) => {
+	switch (ext.toLowerCase()) {
+		case ".js": return "javascript";
+		case ".json": return "json";
+		case ".md": return "markdown";
+		case ".vue":
+		case ".html":
+			return "html";
+	}
+	return "javascript";
+}
 
 export default {
     name: 'Code',
 	components: {
 		MonacoEditor,
-		VJstree,
 	},
 	created() {
-		const folder = this.$route.params.folder;
+		let folder = this.$route.params.folder;
 		if ( folder === undefined || folder === "" ) {
 			folder = "sopia";
 		}
+		let target = "";
+
+		const dirS = folder.split('/');
+		if ( dirS.length > 1 ) {
+			folder = dirS.shift();
+			target = dirS.join('/');
+		}
+		
 		this.targetFolder = folder;
 	},
 	watch: {
@@ -133,24 +203,44 @@ export default {
 				folder = "sopia";
 			}
 			this.targetFolder = folder;
-			this.jstreeReload();
+			this.treeReload();
 		},
 	},
 	methods: {
-		FitemClick(node, A, evt) {
-			if ( A.folder ) {
+		iconFinder,
+		extname: path.extname,
+		FitemClick(node) {
+			if ( node.data.isFolder ) {
 				// folder something to do.
 			} else {
-				const file = A.value;
+				const file = node.data.value;
+
+				const idx = this.openedTabs.findIndex((tab) => tab.data.value === file);
+				if ( idx === -1 ) {
+					this.openedTabs.push(node);
+				}
 				if ( fs.existsSync(file) ) {
 					const data = fs.readFileSync(file, { encoding: 'utf-8' });
-					this.code = data;
+					this.editor.code = data;
+					this.editor.language = getLanguage(path.extname(file));
 					this.selectPath = file;
+					
 					localStorage.setItem(`${this.targetFolder}-last-select`, file);
 				} else {
 					console.warn(file, 'not exists');
 				}
 			}
+		},
+		closeTab(node, idx) {
+			const tmpTabs = this.openedTabs;
+			tmpTabs.splice(idx, 1);
+			this.editor.code = "";
+			if ( tmpTabs.length > 0 ) {
+				this.FitemClick(tmpTabs[0]);
+			} else {
+
+			}
+			this.openedTabs = tmpTabs;
 		},
 		checkFolder () {
 			return new Promise((resolve, reject) => {
@@ -200,51 +290,27 @@ export default {
 						fl.forEach(f => {
 							const fullPath = path.join(target,f);
 							const stats = fs.statSync(fullPath);
-							const obj = {};
+							const obj = { data: {} };
 							const oriObjIdx = Array.isArray(ori_) ? ori_.findIndex((oo) => {
-								if ( oo["value"] === fullPath ) return true;
-								if ( oo["value"] === this.cm.rename.value ) return true;
+								if ( oo.data["value"] === fullPath ) return true;
+								if ( oo.data["value"] === this.cm.rename.value ) return true;
 							}) : -1;
-							const oriObj = oriObjIdx >= 0 ? ori_[oriObjIdx] : null;
+							const oriObj = oriObjIdx >= 0 ? ori_[oriObjIdx] : {};
 
 							obj["text"] = f;
-							obj["value"] = fullPath;
-							obj["isLeaf"] = false;
-
-							if ( this.selected ) {
-								if ( this.selected === fullPath ) {
-									obj["selected"] = true;
-								}
-							} else if ( ori.length === 0 && fullPath === localStorage.getItem(`${this.targetFolder}-last-select`) ) {
-								obj["selected"] = true;
-							} else if ( oriObj ) {
-								obj["selected"] = oriObj["selected"] ? true : false;
-							}
+							obj.data["value"] = fullPath;
 
 							if ( stats.isDirectory() ) {
-								obj["icon"] = "fa fa-folder";
-								obj["children"] = readdir(fullPath, "", oriObj ? oriObj.children : null);
-								obj["folder"] = true;
-
-								if ( oriObj ) {
-									obj["opened"] = oriObj["opened"] ? true : false;
-								} else {
-									obj["opened"] = false;
-								}
+								obj["state"] = {
+									expanded: oriObj["states"] && oriObj["states"].expanded
+								};
+								obj.data['isFolder'] = true;
+								obj["children"] = readdir(fullPath, "", oriObj && oriObj.children );
+								
 							} else {
-								obj["icon"] = iconFinder(path.extname(f));
-								obj["children"] = [];
-
-								if ( obj["selected"] === true ) {
-									const file = obj["value"];
-									if ( fs.existsSync(file) ) {
-										const data = fs.readFileSync(file, { encoding: 'utf-8' });
-										this.code = data;
-										this.selectPath = file;
-									} else {
-										console.warn(file, 'not exists');
-									}
-								}
+								obj["state"] = oriObj["state"] || {};
+								obj.data['isFolder'] = false;
+								obj.data["icon"] = iconFinder(path.extname(f));
 							}
 
 							arr.push(obj);
@@ -259,22 +325,9 @@ export default {
 
 			return readdir(src, "", ori);
 		},
-		folderTreeAsync(oriNode, resolve) {
-			this.checkFolder()
-				.then(() => {
-					const o = this.buildFolderTree(this.up(this.targetFolder));
-					if ( o.length === 0 ) {
-						this.jstreeRender = false;
-						return;
-					}
-					resolve(o);
-				});
-		},
-		itemContextMenu(item, A, evt) {
+		itemContextMenu(evt, node) {
 			let x = evt.x;
 			let y = evt.y;
-
-			evt.target.click();
 
 			if ( window.innerWidth >= 1200 ) {
 				if ( this.$sidebar.isMinimized ) {
@@ -288,7 +341,7 @@ export default {
 			this.cm.top = y;
 			this.cm.display = "block";
 
-			this.cm.target = item;
+			this.cm.target = node;
 			evt.preventDefault();
 		},
 		inputKeyEvt(evt) {
@@ -325,66 +378,71 @@ export default {
 
 			fs.renameSync(fullPath, dstPath);
 
-			this.cm.rename.value = fullPath;
-			this.oriFolderTree = this.folderTree;
-			this.jstreeReload();
+			this.cm.rename.value = '';
+			this.treeReload(() => {
+				const idx = this.openedTabs.findIndex((tab) => tab.data.value === fullPath);
+				if ( idx !== -1 ) {
+					this.openedTabs[idx].data.value = dstPath;
+					this.openedTabs[idx].text = dst;
+					this.selectPath = dstPath;
+				}
+			});
 		},
 		unlink() {
 			const fullPath = this.cm.target.data.value;
 			if ( fs.existsSync(fullPath) ) {
 				rimraf.sync(fullPath);
-				this.jstreeReload();
+				this.treeReload(() => {
+					const idx = this.openedTabs.findIndex((tab) => tab.data.value === fullPath);
+					if ( idx !== -1 ) {
+						this.closeTab(this.openedTabs[idx], idx);
+					}
+				});
+			} else {
+				this.$logger.debug('code', `다음 폴더 또는 파일이 없습니다. ${fullPath}`);
 			}
 		},
 		newFile() {
 			if ( this.cm.rename.value.trim() === "" ) return;
 
 			const dirPath = 
-				this.cm.target.data.folder ?
+				this.cm.target.children.length > 0 ?
 					this.cm.target.data.value :
 					path.dirname(this.cm.target.data.value);
 			const dstPath = path.join(dirPath, this.cm.rename.value);
 			fs.writeFileSync(dstPath, '');
 			this.selected = dstPath;
-			this.jstreeReload();
+			this.treeReload();
 		},
 		newFolder() {
 			if ( this.cm.rename.value.trim() === "" ) return;
 
 			const dirPath = 
-				this.cm.target.data.folder ?
+				this.cm.target.children.length > 0 ?
 					this.cm.target.data.value :
 					path.dirname(this.cm.target.data.value);
 			const dstPath = path.join(dirPath, this.cm.rename.value);
 			fs.mkdirSync(dstPath);
 			this.selected = dstPath;
-			this.jstreeReload();
+			this.treeReload();
 		},
-		jstreeForceRenderer() {
-			this.jstreeRender = false;
-			this.$nextTick(() => {
-				this.jstreeRender = true;
-			});
-		},
-		jstreeReload() {
-			if ( !this.jstreeRender ) this.jstreeRender = true;
+		treeReload(cb = () => {}) {
+			this.oriFolderTree = this.$refs.tree.tree.model;
+			this.treeRender = false;
+			this.folderTree = this.buildFolderTree(this.up(this.targetFolder));
+			this.$nextTick()
+				.then(() => {
+					this.treeRenderer = true;
+					this.$forceUpdate();
+					this.folderKey += 1;
+					
 
-			const reload = () => {
-				this.folderTree = this.buildFolderTree(this.up(this.targetFolder));
-				if ( this.folderTree.length === 0 ) {
-					this.jstreeRender = false;
-				} else {
-					this.$refs.tree.handleAsyncLoad(this.folderTree, this.$refs.tree);
-					this.jstreeForceRenderer();
-				}
-			};
-
-			let itv = setInterval(() => {
-				if ( this.$refs.tree ) {
-					reload();
-					clearInterval(itv);
-				}
-			}, 100);
+					this.$nextTick()
+						.then(() => {
+							this.$refs.tree.$on('node:selected', this.FitemClick);
+							cb();
+						});
+				});
 		},
 		save(editor) {
 			if ( !this.selectPath ) {
@@ -429,19 +487,27 @@ export default {
 				//this.cm.target = null;
 			}
 		});
+
+
+		this.treeRenderer = false;
+		this.folderTree = this.buildFolderTree(this.up(this.targetFolder));
+		this.treeReload(() => {});
 	},
 	data() {
 		return {
-			code: '',
-			editorOption: {
-				automaticLayout: true,
+			editor: {
+				options: {
+					automaticLayout: true,
+				},
+				language: 'javascript',
+				code: '',
+				theme: 'vs-dark',
 			},
-			folderTree: [], 
-			oriFolderTree: [],
+			folderTree: [],
+			folderKey: 0,
 			selected: null,
-			itemEvents: {
-				contextmenu: this.itemContextMenu,
-			},
+			oriFolderTree: [],
+			openedTabs: [],
 			cm: {
 				left: 0,
 				top: 0,
@@ -452,7 +518,7 @@ export default {
 					value: '',
 				},
 			},
-			jstreeRender: true,
+			treeRenderer: true,
 			inputType: '',
 			selectPath: null,
 			notification: { result: true },
@@ -488,26 +554,62 @@ export default {
 .editor > .monaco-editor {
 	margin: 0;
 	width: 100% !important;
+	padding-top: 7px;
 }
 .editor > .monaco-editor > .overflow-guard {
 	margin: 0;
 	width: 100% !important;
 }
+/*
+.monaco-scrollable-element {
+	background-color: white;
+}
+*/
 
 .custom .fa-js {
 	color: #ffff59;
 }
 
-.custom .fa-folder {
-	color: #f2a200;
+.custom .fa-vuejs {
+	color: #41B883;
 }
 
-.custom span {
-	font-weight: 400;
+.custom .fa-markdown {
+	color: #ff7657;
 }
 
-.custom li.tree-node {
-	background-image: none !important;
+.custom .fa-bullseye {
+	color: #5e72e4;
+}
+
+.custom .tree-arrow.has-child:after {
+	border: 1.5px solid white;
+    position: absolute;
+    border-left: 0;
+    border-top: 0;
+    left: 9px;
+    top: 50%;
+    height: 9px;
+    width: 9px;
+    transform: rotate(-45deg) translateY(-50%) translateX(0);
+    transition: transform .25s;
+    transform-origin: center;
+}
+
+.custom .tree-anchor .tree-text {
+	color: white;
+}
+
+.custom .tree-node:not(.selected)>.tree-content:hover {
+	background: rgba(55, 55, 75, 0.5);
+}
+
+.custom .tree-node.selected>.tree-content {
+	background: rgba(75, 75, 105, 0.5);
+}
+
+.custom .tree-arrow {
+	margin-left: 0px;
 }
 
 .context {
@@ -554,9 +656,6 @@ export default {
 }
 .rename-input input.form-control:focus {
 	background: rgba(67, 72, 102, 0.7);
-}
-.monaco-scrollable-element {
-	background-color: white;
 }
 .el-tooltip__popper {
 	margin-top: 10px;

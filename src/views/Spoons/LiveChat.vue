@@ -9,7 +9,7 @@
             <div class="col col-12 pa-0" style="overflow-x: hidden;">
                 <!-- S:Not Join Live -->
                 <div 
-                    v-if="!$s().$live() || $s().$live().isConnect === false"
+                    v-if="!$s().$live() && !$s().$live().info"
                     class="row align-items-center justify-content-center"
                     style="height: 100%">
                     <div class="col-lg-7 col-md-10">

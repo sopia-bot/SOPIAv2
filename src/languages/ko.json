@@ -28,7 +28,12 @@
 			"save": "저장",
 			"reload": "코드 적용",
 			"open-folder": "코드 폴더 열기"
-		}
+		},
+		"not-opened": "열린 파일이 없습니다.",
+		"open-desc": [
+			"왼쪽 목록에서 편집할 파일을 선택할 수 있습니다.",
+			"파일 이름을 오른쪽 클릭하면 메뉴가 보입니다."
+		]
 	},
 	"login": {
 		"input-serial": "발급받은 시리얼을 입력하십시오.",
@@ -134,12 +139,26 @@
 			"make": "만들기",
 			"bundle-name": "번들 이름",
 			"bundle-key": "번들 Key",
-			"key-rule": "영 소문자 및 - 로만 작성 가능"
+			"key-rule": "영 소문자 및 - 로만 작성 가능",
+			"desc": "한 줄 설명",
+			"should-not-empty": "비어있는 항목이 있습니다.",
+			"should-match-rule": "번들 Key에 들어갈 수 없는 문자가 있습니다.",
+			"exist-bundle": "동일한 Key를 가지고 있는 번들이 있습니다.",
+			"use-vue": "Vue.js 사용"
+		},
+		"permission": {
+			"title": "사용 권한",
+			"all": "모두",
+			"manager": "매니저",
+			"dj": "DJ",
+			"admin": "관리자"
 		}
 	},
 	"manager": "매니저",
 	"save": "저장",
 	"profile": "프로필",
 	"search": "검색",
-	"cancel": "취소"
+	"cancel": "취소",
+	"error": "오류",
+	"close": "닫기"
 }

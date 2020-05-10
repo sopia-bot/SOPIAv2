@@ -13,20 +13,7 @@
 				</div>
 			</div>
 		</div>
-		<modal :show.sync="modals.createBundle">
-			<template slot="header">
-				<h5 class="modal-title"> {{ $t('bundle.new-bundle.title') }} </h5>
-			</template>
-			<div>
-				<base-input
-					:placeholder="$t('bundle.new-bundle.bundle-name')"
-					input-classes="from-control-muted"></base-input>
-			</div>
-			<template slot="footer">
-				<base-button type="secondary" @click="modals.createBundle = false;"> {{ $t('cancel') }} </base-button>
-				<base-button type="primary"> {{ $t('bundle.new-bundle.make') }} </base-button>
-			</template>
-		</modal>
+		<create-bundle-modal />
 	</div>
 </template>
 <script>
@@ -39,7 +26,9 @@ export default {
 	},
 	methods: {
 		createBundleProject() {
-			this.modals.createBundle = true;
+			this.$evt.$emit('create-bundle', {
+				type: 'show',
+			});
 		},
 	},
 	mounted() {
