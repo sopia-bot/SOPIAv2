@@ -262,7 +262,7 @@ class Spoon {
 			logger.debug('spoon', `Load event script Type[${type}] at ${p}`);
 			return true;
 		} else {
-			logger.error('spoon', `${p} is not exists.`);
+			logger.err('spoon', `${p} is not exists.`);
 			return false;
 		}
 	}

@@ -176,6 +176,8 @@ export default {
 		
 		this.$cfg('app').__loadConfigFile();
 		this.$cfg('admins').__loadConfigFile();
+
+		sessionStorage.clear();
 		
 		this.checkUserValid()
 			.then((userInfo) => {

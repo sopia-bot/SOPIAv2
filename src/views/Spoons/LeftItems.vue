@@ -7,7 +7,7 @@
             <div
                 v-for="(con, idx) in controls"
                 :key="con.title + '-' + idx"
-                v-if="con['v-if'] ? con['v-if']() : true"
+                v-if="con['v-if'] ? con['v-if'](tab) : true"
                 class="mb-3"
                 :class="con.class">
                 <div class="card-body bg-white rounded-lg text-center mb-0" :class="con.cardClass || ''">
@@ -56,7 +56,7 @@
                                 <p class="ma-0">{{ $t('spoon.live.info.title') }}</p>
                             </div>
                             <div class="col col-12 col-md-9 text-right">
-                                <p class="ma-0">{{ live.data && live.data.title }}</p>
+                                <p class="ma-0">{{ $s().$live().info && $s().$live().info.title }}</p>
                             </div>
                         </div>
                         <div class="row ma-0 mb-3 justify-content-center">
@@ -64,7 +64,7 @@
                                 <p class="ma-0">{{ $t('spoon.live.info.dj') }}</p>
                             </div>
                             <div class="col col-12 col-md-6 text-right">
-                                <p class="ma-0">{{ live.data && live.data.author.nickname }}</p>
+                                <p class="ma-0">{{ $s().$live().info && $s().$live().info.author.nickname }}</p>
                             </div>
                         </div>
                         <div class="row ma-0 mb-3 justify-content-center">
@@ -72,7 +72,7 @@
                                 <p class="ma-0">{{ $t('spoon.live.info.dj-tag') }}</p>
                             </div>
                             <div class="col col-12 col-md-6 text-right">
-                                <p class="ma-0">{{ live.data && live.data.author.tag }}</p>
+                                <p class="ma-0">{{ $s().$live().info && $s().$live().info.author.tag }}</p>
                             </div>
                         </div>
                         <div class="row ma-0 justify-content-center">
@@ -80,8 +80,8 @@
                                 <p class="ma-0">{{ $t('spoon.live.info.url') }}</p>
                             </div>
                             <div class="col col-12 col-md-9 text-right">
-                                <a :href="live.info && live.info.liveUrl" target="_blank" class="ma-0">
-                                    {{ live.info && live.info.liveUrl }}
+                                <a :href="$s().$live() && $s().$live().liveUrl" target="_blank" class="ma-0">
+                                    {{ $s().$live() && $s().$live().liveUrl }}
                                 </a>
                             </div>
                         </div>
@@ -109,8 +109,10 @@ export default {
     name: 'SpoonLeftItem',
     methods: {
         getProgressLive() {
-			if ( this.live.data ) {
-				const created = new Date(this.live.data.created).getTime();
+            const liveClass = this.$s().$live();
+			if ( liveClass && liveClass.info ) {
+                const live = liveClass.info;
+				const created = new Date(live.created).getTime();
 				const now = new Date().getTime();
 				const max = 7200;
 				return Math.round(((now-created)/1000) / max * 100);
@@ -124,11 +126,43 @@ export default {
             this.tab = this.$store.getters.spoonTab;
         });
         this.tab = this.$store.getters.spoonTab;
+
+        this.$evt.$on('live-tab-change', (tab) => {
+            this.tab = tab;
+        });
+
+        this.$evt.$on('leftitems-controls', (evt) => {
+            switch ( evt.type ) {
+                case "unshift":
+                    this.controls.unshift(evt.data);
+                    break;
+                case "delete":
+                    const idx = this.controls.findIndex((control => {
+                        return control.key = evt.key;
+                    }));
+                    if ( idx >= 0 ) {
+                        this.controls.splice(idx, 1);
+                    }
+                    break;
+            }
+        });
+
+
+		if ( sessionStorage.getItem('popup') === "true" ) {
+			this.popupWindow = true;
+		}
+        
+		this.popupSpoon = this.$store.getters.popupSpoon;
+		this.$store.watch(() => this.$store.getters.popupSpoon, (val) => {
+			this.popupSpoon = this.$store.getters.popupSpoon;
+		});
     },
     data() {
         return {
             live: this.$s().$live(),
             tab: 'live-list',
+			popupWindow: false,
+			popupSpoon: false,
             controls: [
 				{
 					// window popup button
@@ -144,11 +178,8 @@ export default {
 					"callback": () => {
                         this.$store.commit('popupSpoon', true);
                         const live = this.$s().$live();
-						if ( live && live.data ) {
-							sessionStorage['before-live'] = live.data.id;
-						}
 						this.$assign("/dashboard/");
-						ipcRenderer.send('spoon-popup', (live && live.data) || null);
+						ipcRenderer.send('spoon-popup', (live && live.info) || null);
 					}
 				},
 				{
@@ -181,7 +212,14 @@ export default {
 					"sub-title": this.$t('spoon.controls.listener'),
 					"type": "stats",
 					"class": "col col-12 col-md-6",
-					"content": () => this.live.data ? this.live.data.member_count : 0,
+					"content": () => {
+                        const liveClass = this.$s().$live();
+                        if ( liveClass && liveClass.info ) {
+                            const live = liveClass.info;
+                            return live.member_count;
+                        }
+                        return 0;
+                    },
 					"v-if": () => this.tab === 'live-chat',
 					"icon": "ni ni-headphones",
 					"itemClass": "bg-default text-white",
@@ -192,7 +230,14 @@ export default {
 					"sub-title": this.$t('spoon.controls.like'),
 					"type": "stats",
 					"class": "col col-12 col-md-6",
-					"content": () => this.live.data ? this.live.data.like_count : 0,
+					"content": () => {
+                        const liveClass = this.$s().$live();
+                        if ( liveClass && liveClass.info ) {
+                            const live = liveClass.info;
+                            return live.like_count;
+                        }
+                        return 0;
+                    },
 					"v-if": () => this.tab === 'live-chat',
 					"icon": "ni ni-favourite-28",
 					"itemClass": "bg-red text-white",
@@ -203,7 +248,14 @@ export default {
 					"sub-title": this.$t('spoon.controls.sum'),
 					"type": "stats",
 					"class": "col col-12 col-md-6",
-					"content": () => this.live.data ? this.live.data.total_member_count : 0,
+					"content": () => {
+                        const liveClass = this.$s().$live();
+                        if ( liveClass && liveClass.info ) {
+                            const live = liveClass.info;
+                            return live.total_member_count;
+                        }
+                        return 0;
+                    },
 					"v-if": () => this.tab === 'live-chat',
 					"icon": "ni ni-circle-08",
 					"itemClass": "bg-spoon text-white",

@@ -58,6 +58,7 @@ const getApiKey = () => {
             getApiKeyMutex = false;
         });
 }
+getApiKey();
 
 const voices = {
     "minji": {languageCode: 'ko-KR', name: 'ko-KR-Wavenet-A', ssmlGender: 'FEMALE'},
@@ -92,7 +93,7 @@ const read = (str, type = "minji") => {
         axios({
             url: `https://texttospeech.googleapis.com/v1/text:synthesize`,
             params: {
-                key: 'AIzaSyDFO532YHybItji1i7ZhhDQWDWCir3kRFY',
+                key: apiKey,
                 alt: 'json',
             },
             method: 'post',

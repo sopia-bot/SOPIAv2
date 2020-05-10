@@ -38,11 +38,15 @@ export default class Live {
 		this.isSaveChat = false;
 		this.saveFile = '';
 
+		this.info = {};
+		this.msgs = [];
+
 		const keys = Object.keys(config);
 		keys.forEach(k => {
 			this[k] = config[k];
 		});
 
+		logger.debug('live', `${live_id} 라이브 클래스가 생성되었습니다.`);
 	}
 
 	__send(msg) {
@@ -181,6 +185,8 @@ export default class Live {
 			}
 			this.__send(msg);
 			this.__health();
+
+			logger.debug('live', `방송 웹 소켓에 성공적으로 연결했습니다.`);
 		}
 	}
 
@@ -200,6 +206,7 @@ export default class Live {
 	disconnect() {
 		this.isConnect = false;
 		this.ws.close();
+		logger.debug('live', `${this.live_id} 방송에 대한 웹 소켓 연결을 해제합니다.`);
 	}
 
 	message(msg) {
