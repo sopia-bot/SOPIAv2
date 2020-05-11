@@ -167,5 +167,8 @@
 	"close": "닫기",
 	"enable": "사용",
 	"enabled": "사용중",
-	"delete": "삭제"
+	"delete": "삭제",
+	"author": "작성자",
+	"version": "버전",
+	"req-ver": "최소 요구 버전"
 }

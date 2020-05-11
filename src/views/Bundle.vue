@@ -72,10 +72,17 @@
             </template>
         </modal>
 		<!-- E:Confirm -->
+		<modal v-if="modals.detail" :show.sync="modals.detail">
+			<template slot="header">
+				<h5 class="modal-title"> {{ selectBundle.name }} </h5>
+			</template>
+			<BundleDetail :bundle.sync="selectBundle" />
+		</modal>
 	</div>
 </template>
 <script>
 import CreateBundleModal from './Bundles/CreateBundle';
+import BundleDetail from './Bundles/BundleDetail';
 import fs from 'fs';
 import path from 'path';
 import rimraf from 'rimraf';
@@ -84,6 +91,7 @@ export default {
 	name: 'Bundle',
 	components: {
 		CreateBundleModal,
+		BundleDetail,
 	},
 	methods: {
 		createBundleProject() {
@@ -92,6 +100,8 @@ export default {
 			});
 		},
 		showBundle(bundle) {
+			this.selectBundle = bundle;
+			this.modals.detail = true;
 		},
 		deleteBundle(bundle, idx) {
 			this.bundles.splice(idx, 1);
@@ -131,9 +141,10 @@ export default {
 		return {
 			modals: {
 				delete: false,
+				detail: false,
 			},
 			bundles: [],
-			selectBundle: null,
+			selectBundle: {},
 		};
 	},
 }
