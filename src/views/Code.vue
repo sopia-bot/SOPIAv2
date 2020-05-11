@@ -482,22 +482,41 @@ export default {
 				return;
 			}
 			try {
-				const rtn = this.jsSyntax(editor.getValue());
-				this.notification = rtn;
-				this.notiShow = !rtn.result;
-
-				if ( rtn.result ) {
-					fs.writeFileSync(this.selectPath, editor.getValue(), {encoding: 'utf8'});
-					// TODO: 성공시 Snackbar 를 띄움.
-					this.$notify({
-						type: 'primary',
-						message: this.$t('code.noti.save-success'),
-						horizontalAlign: 'right',
-						verticalAlign: 'bottom',
-					});
+				const ext = path.extname(this.selectPath);
+				let rtn = { result: true };
+				switch ( ext ) {
+					case ".js":
+					{
+						rtn = this.jsSyntax(editor.getValue());
+						break;
+					}
+					case ".json":
+					{
+						rtn = this.jsSyntax(`JSON.parse(\n${editor.getValue()}\n)`);
+						rtn.line -= 1;
+						break;
+					}
 				}
+				if ( !rtn.result ) {
+					this.notification = rtn;
+					this.notiShow = !rtn.result;
+					return;
+				}
+
+				fs.writeFileSync(this.selectPath, editor.getValue(), {encoding: 'utf8'});
+				this.$notify({
+					type: 'primary',
+					message: this.$t('code.noti.save-success'),
+					horizontalAlign: 'right',
+					verticalAlign: 'bottom',
+				});
 			} catch(err) {
-				// TODO: 실패시 Snackbar 를 띄움.
+				this.$notify({
+					type: 'danger',
+					message: err.message,
+					horizontalAlign: 'right',
+					verticalAlign: 'bottom',
+				});
 				console.error(err);
 			}
 		},
