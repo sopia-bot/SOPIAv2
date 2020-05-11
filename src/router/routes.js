@@ -19,7 +19,12 @@ const routes = [
 		component: () => import('@/views/Dashboard.vue')
 	},
 	{
-		path: '/code/:folder(.*)',
+		path: '/code/:folder/:file(.*)',
+		name: 'Code',
+		component: () => import('@/views/Code.vue')
+	},
+	{
+		path: '/code/:folder/',
 		name: 'Code',
 		component: () => import('@/views/Code.vue')
 	},

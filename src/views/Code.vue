@@ -224,6 +224,8 @@ export default {
 					this.editor.code = data;
 					this.editor.language = getLanguage(path.extname(file));
 					this.selectPath = file;
+
+					node.select();
 					
 					localStorage.setItem(`${this.targetFolder}-last-select`, file);
 				} else {
@@ -265,9 +267,9 @@ export default {
 				}
 			});
 		},
-		buildFolderTree(src) {
+		buildFolderTree(src, selectedFile = "") {
 			const ori = this.oriFolderTree;
-			const readdir = (path_, _d = "", ori_) => {
+			const readdir = (path_, _d = "", ori_, sf) => {
 				_d = _d || "";
 				const target = path.join(_d, path_);
 
@@ -301,8 +303,15 @@ export default {
 							obj.data["value"] = fullPath;
 
 							if ( stats.isDirectory() ) {
+								let expanded = false;
+								if ( sf.length > 0 ) {
+									const p = sf.shift();
+									expanded = (p === f);
+								} else {
+									expanded = (oriObj["states"] && oriObj["states"].expanded);
+								}
 								obj["state"] = {
-									expanded: oriObj["states"] && oriObj["states"].expanded
+									expanded,
 								};
 								obj.data['isFolder'] = true;
 								obj["children"] = readdir(fullPath, "", oriObj && oriObj.children );
@@ -323,7 +332,8 @@ export default {
 				}
 			};
 
-			return readdir(src, "", ori);
+			const sfs = selectedFile ? selectedFile.split('/') : [];
+			return readdir(src, "", ori, sfs);
 		},
 		itemContextMenu(evt, node) {
 			let x = evt.x;
@@ -379,13 +389,15 @@ export default {
 			fs.renameSync(fullPath, dstPath);
 
 			this.cm.rename.value = '';
-			this.treeReload(() => {
+			this.treeReload((tree) => {
 				const idx = this.openedTabs.findIndex((tab) => tab.data.value === fullPath);
 				if ( idx !== -1 ) {
 					this.openedTabs[idx].data.value = dstPath;
 					this.openedTabs[idx].text = dst;
 					this.selectPath = dstPath;
+
 				}
+
 			});
 		},
 		unlink() {
@@ -396,6 +408,7 @@ export default {
 					const idx = this.openedTabs.findIndex((tab) => tab.data.value === fullPath);
 					if ( idx !== -1 ) {
 						this.closeTab(this.openedTabs[idx], idx);
+						this.treeReload();
 					}
 				});
 			} else {
@@ -412,7 +425,12 @@ export default {
 			const dstPath = path.join(dirPath, this.cm.rename.value);
 			fs.writeFileSync(dstPath, '');
 			this.selected = dstPath;
-			this.treeReload();
+			this.treeReload((tree) => {
+				const node = this.searchNode(tree.model, dstPath);
+				if ( node ) {
+					this.FitemClick(node);
+				}
+			});
 		},
 		newFolder() {
 			if ( this.cm.rename.value.trim() === "" ) return;
@@ -439,8 +457,17 @@ export default {
 
 					this.$nextTick()
 						.then(() => {
+							const tree = this.$refs.tree.tree;
 							this.$refs.tree.$on('node:selected', this.FitemClick);
-							cb();
+
+							if ( this.selectPath ) {
+								const node = this.searchNode(tree.model, this.selectPath);
+								if ( node ) {
+									node.select(true);
+								}
+							}
+
+							cb(tree);
 						});
 				});
 		},
@@ -479,6 +506,24 @@ export default {
 				this.save(editor);
 			});
 		},
+		searchNode(nodes, value) {
+			for ( let node of nodes ) {
+				if ( node.children.length === 0 ) {
+					// file
+					if ( node.data.value === value ) {
+						return node;
+					}
+				} else {
+					// folder
+					if ( value.match(node.data.value) ) {
+						if ( !node.states.expanded ) {
+							node.toggleExpand();
+						}
+						return this.searchNode(node.children, value);
+					}
+				}
+			}
+		},
 	},
 	mounted() {
 		document.addEventListener('click', () => {
@@ -490,8 +535,23 @@ export default {
 
 
 		this.treeRenderer = false;
-		this.folderTree = this.buildFolderTree(this.up(this.targetFolder));
-		this.treeReload(() => {});
+		this.folderTree = this.buildFolderTree(this.up(this.targetFolder), this.$route.params.file);
+		this.treeReload((tree) => {
+			const folder = this.$route.params.folder;
+			const file = this.$route.params.file;
+			if ( file ) {
+				const fullPath = this.up(path.join(folder, file));
+				const t = tree.model;
+
+				const search = (nodes) => {
+				};
+
+				const node = this.searchNode(t, fullPath);
+				if ( node ) {
+					node.select(true);
+				}
+			}
+		});
 	},
 	data() {
 		return {

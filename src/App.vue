@@ -179,11 +179,11 @@ export default {
 					sub: [
 						{
 							name: "SOPIA",
-							path: "/code/sopia",
+							path: "/code/sopia/",
 						},
 						{
 							name: "BUNDLE",
-							path: "/code/bundles",
+							path: "/code/bundles/",
 						},
 					]
 				},

@@ -98,7 +98,6 @@ export default {
 	methods: {
 		createBundle() {
 			const bundles = this.bundles;
-			console.log(bundles);
 			if ( bundles.title.trim() === "" ||
 				 bundles.desc.trim() === "" ||
 				 bundles.key.trim() === "" ) {
@@ -128,9 +127,7 @@ export default {
 			const readmePath = path.join(bundleFolder, 'README.md');
 			const configPath = path.join(bundleFolder, 'config.json');
 
-			fs.writeFileSync(indexPath, `// ${bundles.title}\nconsole.log('${this.bundles.title}');`, { encoding: 'utf8' });
-			fs.writeFileSync(readmePath, `# ${bundles.title}`, { encoding: 'utf8' });
-			fs.writeFileSync(configPath, JSON.stringify({
+			bundles.config = {
 				permission: bundles.permission,
 				name: bundles.title,
 				key: bundles.key,
@@ -139,7 +136,11 @@ export default {
 				dep: {},
 				version: '1.0',
 				reqVer: '1.0.0',
-			}, null, '\t'), { encoding: 'utf8' });
+			};
+
+			fs.writeFileSync(indexPath, `// ${bundles.title}\nconsole.log('${bundles.title}');`, { encoding: 'utf8' });
+			fs.writeFileSync(readmePath, `# ${bundles.title}`, { encoding: 'utf8' });
+			fs.writeFileSync(configPath, JSON.stringify(bundles.config, null, '\t'), { encoding: 'utf8' });
 
 			if ( bundles.useVue ) {
 				const vuePath = path.join(bundleFolder, 'App.vue');
@@ -155,6 +156,7 @@ export default {
 				fs.writeFileSync(vuePath, vueString, { encoding: 'utf8' });
 			}
 			
+			this.$logger.success('bundle', `${bundles.title} 번들 생성에 성공했습니다.`, bundles);
 			this.$assign(`/code/bundles/${bundles.key}/index.js`);
 		},
 	},
