@@ -152,6 +152,10 @@
 			"manager": "매니저",
 			"dj": "DJ",
 			"admin": "관리자"
+		},
+		"delete": {
+			"title": "번들 삭제",
+			"confirm": "번들을 삭제하면 되돌릴 수 없습니다."
 		}
 	},
 	"manager": "매니저",
@@ -160,5 +164,8 @@
 	"search": "검색",
 	"cancel": "취소",
 	"error": "오류",
-	"close": "닫기"
+	"close": "닫기",
+	"enable": "사용",
+	"enabled": "사용중",
+	"delete": "삭제"
 }

@@ -127,6 +127,7 @@ export default {
 			const readmePath = path.join(bundleFolder, 'README.md');
 			const configPath = path.join(bundleFolder, 'config.json');
 
+			const user = this.$cfg('app').get('user');
 			bundles.config = {
 				permission: bundles.permission,
 				name: bundles.title,
@@ -135,6 +136,7 @@ export default {
 				useVue: bundles.useVue,
 				dep: {},
 				version: '1.0',
+				author: user.nickname,
 				reqVer: '1.0.0',
 			};
 

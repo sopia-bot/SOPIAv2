@@ -94,8 +94,8 @@ Vue.mixin({
 		 * %appdata%/SOPIA 의 경로를 기준으로,
 		 * @path_ 의 절대 경로를 반환한다.
 		 */
-		up(path_ = "./") {
-			return path.join(this.$store.getters.udpath, path_);
+		up(...path_) {
+			return path.join(this.$store.getters.udpath, ...path_);
 		},
 		jsSyntax(code) {
 			if ( jsOrPath(code) === 'path' ) {
@@ -140,7 +140,7 @@ Vue.mixin({
 		$db() {
 			const fbDbUrl = "https://sopia-bot.firebaseio.com";
 			return {
-				get: (href) => {
+				get: (href, def = null) => {
 					const ext = path.extname(href);
 					if ( href[href.length-1] === "/" ) {
 						href = href.substr(0, href.length-1);
@@ -153,11 +153,17 @@ Vue.mixin({
 					return new Promise((resolve, reject) => {
 						axios.get(reqUrl)
 							.then(res => {
-								resolve(res.data);
+								resolve(res.data || def);
 							})
 							.catch(reject);
 					});
 				}
+			}
+		},
+		json(p) {
+			if ( fs.existsSync(p) ) {
+				const str = fs.readFileSync(p, { encoding: 'utf8' });
+				return JSON.parse(str);
 			}
 		},
 	},
